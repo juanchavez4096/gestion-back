@@ -2,55 +2,27 @@ package com.empresa.consumo.masivo.gestion.DTO;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 
-public class UsuarioDTO implements Serializable {
+public class RegisterDTO implements Serializable {
 
-	
-	private Long usuarioId;
-	@NotNull
-	private Long empresaId;
-	@NotNull
-	private TipoUsuarioDTO tipoUsuario;
 	@NotNull
 	@NotEmpty
 	private String nombre;
 	@NotNull
 	@NotEmpty
+	@Email
 	private String email;
 	@NotNull
 	@NotEmpty
 	private String password;
 	
 	
-	public UsuarioDTO() {
+	public RegisterDTO() {
 		super();
-	}
-
-	public Long getUsuarioId() {
-		return usuarioId;
-	}
-
-	public void setUsuarioId(Long usuarioId) {
-		this.usuarioId = usuarioId;
-	}
-
-	public Long getEmpresaId() {
-		return empresaId;
-	}
-
-	public void setEmpresaId(Long empresaId) {
-		this.empresaId = empresaId;
-	}
-
-	public TipoUsuarioDTO getTipoUsuario() {
-		return tipoUsuario;
-	}
-
-	public void setTipoUsuario(TipoUsuarioDTO tipoUsuario) {
-		this.tipoUsuario = tipoUsuario;
 	}
 
 	public String getNombre() {

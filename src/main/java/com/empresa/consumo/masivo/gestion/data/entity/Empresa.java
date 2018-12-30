@@ -23,7 +23,7 @@ public class Empresa implements java.io.Serializable {
 	@Id
 	@GeneratedValue
 	@Column(name = "empresa_id", unique = true, nullable = false)
-	private int empresaId;
+	private Long empresaId;
 	@Column(name = "nombre", nullable = false)
 	private String nombre;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "empresa")
@@ -37,13 +37,22 @@ public class Empresa implements java.io.Serializable {
 
 	public Empresa() {
 	}
+	
+	
 
-	public Empresa(int empresaId, String nombre) {
+	public Empresa(Long empresaId) {
+		super();
+		this.empresaId = empresaId;
+	}
+
+
+
+	public Empresa(Long empresaId, String nombre) {
 		this.empresaId = empresaId;
 		this.nombre = nombre;
 	}
 
-	public Empresa(int empresaId, String nombre, Set tipoMaterials, Set productos, Set usuarios, Set materials) {
+	public Empresa(Long empresaId, String nombre, Set tipoMaterials, Set productos, Set usuarios, Set materials) {
 		this.empresaId = empresaId;
 		this.nombre = nombre;
 		this.tipoMaterials = tipoMaterials;
@@ -52,11 +61,11 @@ public class Empresa implements java.io.Serializable {
 		this.materials = materials;
 	}
 
-	public int getEmpresaId() {
+	public Long getEmpresaId() {
 		return empresaId;
 	}
 
-	public void setEmpresaId(int empresaId) {
+	public void setEmpresaId(Long empresaId) {
 		this.empresaId = empresaId;
 	}
 

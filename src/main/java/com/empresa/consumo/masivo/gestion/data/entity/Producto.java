@@ -24,7 +24,7 @@ public class Producto implements java.io.Serializable {
 	@Id
 	@GeneratedValue
 	@Column(name = "producto_id", nullable = false)
-	private int productoId;
+	private Long productoId;
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "empresa_id", nullable = false)
 	private Empresa empresa;
@@ -36,24 +36,24 @@ public class Producto implements java.io.Serializable {
 	public Producto() {
 	}
 
-	public Producto(int productoId, Empresa empresa, String nombre) {
+	public Producto(Long productoId, Empresa empresa, String nombre) {
 		this.productoId = productoId;
 		this.empresa = empresa;
 		this.nombre = nombre;
 	}
 
-	public Producto(int productoId, Empresa empresa, String nombre, Set productoMaterials) {
+	public Producto(Long productoId, Empresa empresa, String nombre, Set productoMaterials) {
 		this.productoId = productoId;
 		this.empresa = empresa;
 		this.nombre = nombre;
 		this.productoMaterials = productoMaterials;
 	}
 
-	public int getProductoId() {
+	public Long getProductoId() {
 		return productoId;
 	}
 
-	public void setProductoId(int productoId) {
+	public void setProductoId(Long productoId) {
 		this.productoId = productoId;
 	}
 

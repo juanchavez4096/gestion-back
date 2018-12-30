@@ -34,3 +34,7 @@ logging:
 server:
   port: 8080
 
+jwt:
+  secret: nRvyYC4soFxBdZ-F-5Nnzz5USXstR1YylsTd-mA0aKtI9HUlriGrtkf-TiuDapkLiUCogO3JOK7kwZisrHp6wA
+  sessionTime: 86400
+

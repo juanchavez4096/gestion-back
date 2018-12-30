@@ -7,4 +7,5 @@ import com.empresa.consumo.masivo.gestion.data.entity.Usuario;
 public interface UsuarioRepository extends CrudRepository<Usuario, Integer> {
 
 	Usuario findByEmailAndPassword(String email, String password);
+	Boolean existsByEmail(String email);
 }
