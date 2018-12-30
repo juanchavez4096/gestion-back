@@ -18,8 +18,7 @@ public interface UsuarioMapper {
 	
 	UsuarioMapper INSTANCE = Mappers.getMapper( UsuarioMapper.class );
 	@Mappings({
-	       @Mapping(source = "empresa.empresaId", target = "empresaId"),
-	       @Mapping(target = "password", ignore = true)
+	       @Mapping(source = "empresa.empresaId", target = "empresaId")
 	   }) 
 	UsuarioDTO usuarioToUsuarioDTO(Usuario usuario);
 	

@@ -4,6 +4,8 @@ import java.security.Principal;
 
 import javax.validation.Valid;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +36,7 @@ import com.empresa.consumo.masivo.gestion.security.JwtService;
 @RequestMapping("api/usuario")
 public class UsuarioController {
 	
-	//Logger log = LogManager.getLogger();
+	Logger log = LogManager.getLogger();
 	
 	@Autowired
 	private UsuarioRepository usuarioRepository;
@@ -43,22 +45,19 @@ public class UsuarioController {
 	@Autowired
     private JwtService jwtService;
 	
-	@GetMapping(value="get")
-	public String getMethodName(Principal principal) {
-		return principal.getName();
-	}
-	
 	@RequestMapping(value="login", method=RequestMethod.POST)
 	public ResponseEntity<UserWithToken> getUsuarioById(@Valid @RequestBody LoginDTO loginDTO) {
-		/*UsuarioDTO usuarioDTO =  UsuarioMapper.INSTANCE
-									.usuarioToUsuarioDTO(usuarioRepository.findByEmailAndPassword(loginDTO.getEmail(), encryptService.encrypt(loginDTO.getPassword())));
-		*/
 		UsuarioDTO usuarioDTO =  UsuarioMapper.INSTANCE
-				.usuarioToUsuarioDTO(usuarioRepository.findByEmailAndPassword(loginDTO.getEmail(), loginDTO.getPassword()));
+									.usuarioToUsuarioDTO(usuarioRepository.findByEmail(loginDTO.getEmail()));
 		if (usuarioDTO == null) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}else {
-			return new ResponseEntity<>(new UserWithToken(usuarioDTO, jwtService.toToken(usuarioDTO)), HttpStatus.OK);
+			if (encryptService.check(loginDTO.getPassword(), usuarioDTO.getPassword())) {
+				return new ResponseEntity<>(new UserWithToken(usuarioDTO, jwtService.toToken(usuarioDTO)), HttpStatus.OK);
+			}else {
+				return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+			}
+			
 		}
 		
 	}
@@ -79,13 +78,6 @@ public class UsuarioController {
 		UsuarioDTO newUsuarioDTO = UsuarioMapper.INSTANCE.usuarioToUsuarioDTO(newUsuario);
 		return new ResponseEntity<>(new UserWithToken(newUsuarioDTO, jwtService.toToken(newUsuarioDTO)) , HttpStatus.CREATED);
 	}
-	
-	
-	
-	/*@RequestMapping(value="login", method=RequestMethod.GET)
-	public SomeData requestMethodName(@RequestParam String param) {
-		return new SomeData();
-	}*/
 	
 	
 }

@@ -16,9 +16,11 @@ public class NaiveEncryptService implements EncryptService {
     public String encrypt(String password) {
     	return bCryptPasswordEncoder.encode(password);
     }
+    
+    
 
     @Override
-    public boolean check(String checkPassword, String realPassword) {
-        return checkPassword.equals(realPassword);
+    public boolean check(String password, String encodedPassword) {
+        return bCryptPasswordEncoder.matches(password, encodedPassword);
     }
 }
