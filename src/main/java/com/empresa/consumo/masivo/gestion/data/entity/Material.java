@@ -8,10 +8,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 /**
@@ -22,9 +24,10 @@ import javax.persistence.Table;
 public class Material implements java.io.Serializable {
 
 	@Id
-	@GeneratedValue
+	@SequenceGenerator(name="pk_sequence_material",sequenceName="gestion.material_id_sequence", allocationSize=1)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="pk_sequence_material")
 	@Column(name = "material_id", nullable = false)
-	private int materialId;
+	private Long materialId;
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "empresa_id", nullable = false)
 	private Empresa empresa;
@@ -37,17 +40,42 @@ public class Material implements java.io.Serializable {
 	@Column(name = "nombre", nullable = false)
 	private String nombre;
 	@Column(name = "costo", nullable = false)
-	private long costo;
+	private Double costo;
 	@Column(name = "cantidad_compra", nullable = false)
-	private double cantidadCompra;
+	private Double cantidadCompra;
+	@Column(name = "activo", nullable = false)
+	private Boolean activo;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "material")
 	private Set<ProductoMaterial> productoMaterials = new HashSet<>(0);
 
 	public Material() {
 	}
+	
+	
 
-	public Material(int materialId, Empresa empresa, TipoMaterial tipoMaterial, TipoUnidad tipoUnidad, String nombre,
-			long costo, double cantidadCompra) {
+	public Material(Long materialId) {
+		super();
+		this.materialId = materialId;
+	}
+
+
+
+	public Material(Empresa empresa, TipoMaterial tipoMaterial, TipoUnidad tipoUnidad, String nombre, Double costo,
+			double cantidadCompra, Set<ProductoMaterial> productoMaterials) {
+		super();
+		this.empresa = empresa;
+		this.tipoMaterial = tipoMaterial;
+		this.tipoUnidad = tipoUnidad;
+		this.nombre = nombre;
+		this.costo = costo;
+		this.cantidadCompra = cantidadCompra;
+		this.productoMaterials = productoMaterials;
+	}
+
+
+
+	public Material(Long materialId, Empresa empresa, TipoMaterial tipoMaterial, TipoUnidad tipoUnidad, String nombre,
+			Double costo, Double cantidadCompra) {
 		this.materialId = materialId;
 		this.empresa = empresa;
 		this.tipoMaterial = tipoMaterial;
@@ -57,8 +85,8 @@ public class Material implements java.io.Serializable {
 		this.cantidadCompra = cantidadCompra;
 	}
 
-	public Material(int materialId, Empresa empresa, TipoMaterial tipoMaterial, TipoUnidad tipoUnidad, String nombre,
-			long costo, double cantidadCompra, Set productoMaterials) {
+	public Material(Long materialId, Empresa empresa, TipoMaterial tipoMaterial, TipoUnidad tipoUnidad, String nombre,
+			Double costo, Double cantidadCompra, Set productoMaterials) {
 		this.materialId = materialId;
 		this.empresa = empresa;
 		this.tipoMaterial = tipoMaterial;
@@ -69,11 +97,11 @@ public class Material implements java.io.Serializable {
 		this.productoMaterials = productoMaterials;
 	}
 
-	public int getMaterialId() {
+	public Long getMaterialId() {
 		return materialId;
 	}
 
-	public void setMaterialId(int materialId) {
+	public void setMaterialId(Long materialId) {
 		this.materialId = materialId;
 	}
 
@@ -109,11 +137,11 @@ public class Material implements java.io.Serializable {
 		this.nombre = nombre;
 	}
 
-	public long getCosto() {
+	public Double getCosto() {
 		return costo;
 	}
 
-	public void setCosto(long costo) {
+	public void setCosto(Double costo) {
 		this.costo = costo;
 	}
 
@@ -131,6 +159,24 @@ public class Material implements java.io.Serializable {
 
 	public void setProductoMaterials(Set<ProductoMaterial> productoMaterials) {
 		this.productoMaterials = productoMaterials;
+	}
+
+
+
+	public Boolean getActivo() {
+		return activo;
+	}
+
+
+
+	public void setActivo(Boolean activo) {
+		this.activo = activo;
+	}
+
+
+
+	public void setCantidadCompra(Double cantidadCompra) {
+		this.cantidadCompra = cantidadCompra;
 	}
 
 	

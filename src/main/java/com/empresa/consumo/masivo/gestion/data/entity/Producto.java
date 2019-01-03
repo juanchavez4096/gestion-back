@@ -8,10 +8,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 /**
@@ -22,7 +24,8 @@ import javax.persistence.Table;
 public class Producto implements java.io.Serializable {
 
 	@Id
-	@GeneratedValue
+	@SequenceGenerator(name="pk_sequence_producto",sequenceName="gestion.producto_id_sequence", allocationSize=1)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="pk_sequence_producto")
 	@Column(name = "producto_id", nullable = false)
 	private Long productoId;
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -30,11 +33,29 @@ public class Producto implements java.io.Serializable {
 	private Empresa empresa;
 	@Column(name = "nombre", nullable = false)
 	private String nombre;
+	@Column(name = "activo", nullable = false)
+	private Boolean activo;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "producto")
 	private Set<ProductoMaterial> productoMaterials = new HashSet<>(0);
 
 	public Producto() {
 	}
+
+	public Producto(Long productoId) {
+		super();
+		this.productoId = productoId;
+	}
+
+
+
+	public Producto(Empresa empresa, String nombre) {
+		super();
+		this.empresa = empresa;
+		this.nombre = nombre;
+		this.activo = true;
+	}
+
+
 
 	public Producto(Long productoId, Empresa empresa, String nombre) {
 		this.productoId = productoId;
@@ -81,5 +102,14 @@ public class Producto implements java.io.Serializable {
 		this.productoMaterials = productoMaterials;
 	}
 
+	public Boolean getActivo() {
+		return activo;
+	}
+
+	public void setActivo(Boolean activo) {
+		this.activo = activo;
+	}
+
+	
 	
 }

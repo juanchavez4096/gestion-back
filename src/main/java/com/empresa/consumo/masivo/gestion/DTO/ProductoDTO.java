@@ -2,10 +2,17 @@ package com.empresa.consumo.masivo.gestion.DTO;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 public class ProductoDTO implements Serializable {
 
+	@NotNull
+	@Min(value = 1)
 	private Long productoId;
-	private Long empresaId;
+	@NotNull
+	@NotEmpty
 	private String nombre;
 	
 	public ProductoDTO() {
@@ -20,16 +27,6 @@ public class ProductoDTO implements Serializable {
 
 	public void setProductoId(Long productoId) {
 		this.productoId = productoId;
-	}
-
-
-	public Long getEmpresaId() {
-		return empresaId;
-	}
-
-
-	public void setEmpresaId(Long empresaId) {
-		this.empresaId = empresaId;
 	}
 
 

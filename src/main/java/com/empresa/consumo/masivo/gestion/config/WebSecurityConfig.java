@@ -32,11 +32,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-        if (h2ConsoleEnabled)
-            http.authorizeRequests()
-                .antMatchers("/h2-console", "/h2-console/**").permitAll()
-                .and()
-                .headers().frameOptions().sameOrigin();
+        
+        http.authorizeRequests()
+            .antMatchers("/registroUsuario.html","/resetPassword.html","/swagger-ui.html/**", "/api/swagger-ui.html/**", "/webjars/**", "/swagger-resources/**", "/v2/api-docs").permitAll()
+            .and()
+            .headers().frameOptions().sameOrigin();
 
         http.csrf().disable()
             .cors()

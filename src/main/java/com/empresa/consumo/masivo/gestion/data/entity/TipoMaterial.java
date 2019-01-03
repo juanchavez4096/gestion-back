@@ -8,10 +8,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 /**
@@ -22,9 +24,10 @@ import javax.persistence.Table;
 public class TipoMaterial implements java.io.Serializable {
 
 	@Id
-	@GeneratedValue
+	@SequenceGenerator(name="pk_sequence_tipo_material",sequenceName="gestion.tipo_material_id_sequence", allocationSize=1)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="pk_sequence_tipo_material")
 	@Column(name = "tipo_material_id", nullable = false)
-	private int tipoMaterialId;
+	private Long tipoMaterialId;
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "empresa_id", nullable = false)
 	private Empresa empresa;
@@ -36,24 +39,24 @@ public class TipoMaterial implements java.io.Serializable {
 	public TipoMaterial() {
 	}
 
-	public TipoMaterial(int tipoMaterialId, Empresa empresa, String tipo) {
+	public TipoMaterial(Long tipoMaterialId, Empresa empresa, String tipo) {
 		this.tipoMaterialId = tipoMaterialId;
 		this.empresa = empresa;
 		this.tipo = tipo;
 	}
 
-	public TipoMaterial(int tipoMaterialId, Empresa empresa, String tipo, Set materials) {
+	public TipoMaterial(Long tipoMaterialId, Empresa empresa, String tipo, Set materials) {
 		this.tipoMaterialId = tipoMaterialId;
 		this.empresa = empresa;
 		this.tipo = tipo;
 		this.materials = materials;
 	}
 
-	public int getTipoMaterialId() {
+	public Long getTipoMaterialId() {
 		return tipoMaterialId;
 	}
 
-	public void setTipoMaterialId(int tipoMaterialId) {
+	public void setTipoMaterialId(Long tipoMaterialId) {
 		this.tipoMaterialId = tipoMaterialId;
 	}
 

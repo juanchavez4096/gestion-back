@@ -44,6 +44,16 @@ public class ProductoMaterial implements java.io.Serializable {
 		this.tipoUnidad = tipoUnidad;
 		this.cantidad = cantidad;
 	}
+	
+	
+
+	public ProductoMaterial(Material material, Producto producto, TipoUnidad tipoUnidad, double cantidad) {
+		super();
+		this.material = material;
+		this.producto = producto;
+		this.tipoUnidad = tipoUnidad;
+		this.cantidad = cantidad;
+	}
 
 	public int getProductoMaterialId() {
 		return productoMaterialId;

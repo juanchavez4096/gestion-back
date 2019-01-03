@@ -44,6 +44,15 @@ public class Empresa implements java.io.Serializable {
 		super();
 		this.empresaId = empresaId;
 	}
+	
+	
+
+
+
+	public Empresa(String nombre) {
+		super();
+		this.nombre = nombre;
+	}
 
 
 

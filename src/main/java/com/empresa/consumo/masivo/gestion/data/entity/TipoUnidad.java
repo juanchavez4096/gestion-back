@@ -22,13 +22,13 @@ public class TipoUnidad implements java.io.Serializable {
 	@Id
 	@GeneratedValue
 	@Column(name = "tipo_unidad_id", nullable = false)
-	private int tipoUnidadId;
+	private Long tipoUnidadId;
 	@Column(name = "tipo", nullable = false)
 	private String tipo;
 	@Column(name = "unidad", nullable = false)
 	private String unidad;
-	@Column(name = "referecia_en_gramos", nullable = false)
-	private double referenciaEnGramos;
+	@Column(name = "referencia_en_gramos", nullable = false)
+	private Double referenciaEnGramos;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "tipoUnidad")
 	private Set<Material> materials = new HashSet<>(0);
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "tipoUnidad")
@@ -37,14 +37,14 @@ public class TipoUnidad implements java.io.Serializable {
 	public TipoUnidad() {
 	}
 
-	public TipoUnidad(int tipoUnidadId, String tipo, String unidad, double referenciaEnGramos) {
+	public TipoUnidad(Long tipoUnidadId, String tipo, String unidad, double referenciaEnGramos) {
 		this.tipoUnidadId = tipoUnidadId;
 		this.tipo = tipo;
 		this.unidad = unidad;
 		this.referenciaEnGramos = referenciaEnGramos;
 	}
 
-	public TipoUnidad(int tipoUnidadId, String tipo, String unidad, double referenciaEnGramos, Set materials,
+	public TipoUnidad(Long tipoUnidadId, String tipo, String unidad, double referenciaEnGramos, Set materials,
 			Set productoMaterials) {
 		this.tipoUnidadId = tipoUnidadId;
 		this.tipo = tipo;
@@ -54,11 +54,11 @@ public class TipoUnidad implements java.io.Serializable {
 		this.productoMaterials = productoMaterials;
 	}
 
-	public int getTipoUnidadId() {
+	public Long getTipoUnidadId() {
 		return tipoUnidadId;
 	}
 
-	public void setTipoUnidadId(int tipoUnidadId) {
+	public void setTipoUnidadId(Long tipoUnidadId) {
 		this.tipoUnidadId = tipoUnidadId;
 	}
 
