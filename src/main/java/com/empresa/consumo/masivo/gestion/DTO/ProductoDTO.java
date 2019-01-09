@@ -6,6 +6,11 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ProductoDTO implements Serializable {
 
 	@NotNull
@@ -18,28 +23,5 @@ public class ProductoDTO implements Serializable {
 	public ProductoDTO() {
 		super();
 	}
-
-
-	public Long getProductoId() {
-		return productoId;
-	}
-
-
-	public void setProductoId(Long productoId) {
-		this.productoId = productoId;
-	}
-
-
-	public String getNombre() {
-		return nombre;
-	}
-
-
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
-	
-	
-	
 	
 }

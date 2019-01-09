@@ -3,6 +3,11 @@ package com.empresa.consumo.masivo.gestion.DTO;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class TipoUnidadDTO implements java.io.Serializable {
 
 	@NotNull
@@ -30,38 +35,6 @@ public class TipoUnidadDTO implements java.io.Serializable {
 		this.unidad = unidad;
 		this.referenciaEnGramos = referenciaEnGramos;
 	}
-	
 
-	public Long getTipoUnidadId() {
-		return tipoUnidadId;
-	}
-
-	public void setTipoUnidadId(Long tipoUnidadId) {
-		this.tipoUnidadId = tipoUnidadId;
-	}
-
-	public String getTipo() {
-		return tipo;
-	}
-
-	public void setTipo(String tipo) {
-		this.tipo = tipo;
-	}
-
-	public String getUnidad() {
-		return unidad;
-	}
-
-	public void setUnidad(String unidad) {
-		this.unidad = unidad;
-	}
-
-	public Double getReferenciaEnGramos() {
-		return referenciaEnGramos;
-	}
-
-	public void setReferenciaEnGramos(Double referenciaEnGramos) {
-		this.referenciaEnGramos = referenciaEnGramos;
-	}
 
 }
