@@ -35,6 +35,6 @@ server:
   port: 8080
 
 jwt:
-  secret: nRvyYC4soFxBdZ-F-5Nnzz5USXstR1YylsTd-mA0aKtI9HUlriGrtkf-TiuDapkLiUCogO3JOK7kwZisrHp6wA
+  secret: jqg)[i#|b"7j.$0kH;{UiQ$(@X<!r0dHgJ7GYT.jaF_#*9^E9^ynw!)sdq\|b|~
   sessionTime: 86400
 
