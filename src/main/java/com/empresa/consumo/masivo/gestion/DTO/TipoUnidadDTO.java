@@ -1,8 +1,12 @@
 package com.empresa.consumo.masivo.gestion.DTO;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 public class TipoUnidadDTO implements java.io.Serializable {
 
-	
+	@NotNull
+	@Min(value = 1)
 	private Long tipoUnidadId;
 	private String tipo;
 	private String unidad;
@@ -20,7 +24,7 @@ public class TipoUnidadDTO implements java.io.Serializable {
 
 
 
-	public TipoUnidadDTO(Long tipoUnidadId, String tipo, String unidad, double referenciaEnGramos) {
+	public TipoUnidadDTO(Long tipoUnidadId, String tipo, String unidad, Double referenciaEnGramos) {
 		this.tipoUnidadId = tipoUnidadId;
 		this.tipo = tipo;
 		this.unidad = unidad;
@@ -52,11 +56,11 @@ public class TipoUnidadDTO implements java.io.Serializable {
 		this.unidad = unidad;
 	}
 
-	public double getReferenciaEnGramos() {
+	public Double getReferenciaEnGramos() {
 		return referenciaEnGramos;
 	}
 
-	public void setReferenciaEnGramos(double referenciaEnGramos) {
+	public void setReferenciaEnGramos(Double referenciaEnGramos) {
 		this.referenciaEnGramos = referenciaEnGramos;
 	}
 

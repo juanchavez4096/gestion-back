@@ -74,11 +74,11 @@ public class MaterialDTO implements java.io.Serializable {
 		this.costo = costo;
 	}
 
-	public double getCantidadCompra() {
+	public Double getCantidadCompra() {
 		return cantidadCompra;
 	}
 
-	public void setCantidadCompra(double cantidadCompra) {
+	public void setCantidadCompra(Double cantidadCompra) {
 		this.cantidadCompra = cantidadCompra;
 	}
 

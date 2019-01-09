@@ -1,6 +1,7 @@
 package com.empresa.consumo.masivo.gestion.controller;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -83,6 +84,7 @@ public class ProductoMaterialController {
 		return new ResponseEntity<>(pageProductosMateriales, HttpStatus.OK);
 	}
 	
+	//DONE
 	@RequestMapping(value="add", method = RequestMethod.POST)
 	public ResponseEntity<?> addProductoMaterial(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @Valid @RequestBody AddProductoMaterialDTO addProductoMaterialDTO) {
 		
@@ -99,9 +101,11 @@ public class ProductoMaterialController {
 		ProductoMaterial productoMaterial = new ProductoMaterial(new Material(addProductoMaterialDTO.getMaterialId()), new Producto(addProductoMaterialDTO.getProductoId()), ProductoMapper.INSTANCE.tipoUnidadDTOToTipoUnidad(addProductoMaterialDTO.getTipoUnidad()), addProductoMaterialDTO.getCantidad());
 		productoMaterialRepository.save(productoMaterial);
 		
+		
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 	
+	//DONE
 	@RequestMapping(value="update", method = RequestMethod.PUT)
 	public ResponseEntity<?> updateProductoMaterial(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @Valid @RequestBody ModifyProductoMaterialDTO modifyProductoMaterialDTO) {
 		
@@ -110,11 +114,17 @@ public class ProductoMaterialController {
 		}
 		
 		
-		ProductoMaterial productoMaterial = productoMaterialRepository.findById(modifyProductoMaterialDTO.getProductoMaterialId()).get();
-		if (productoMaterial.getProducto().getEmpresa().getEmpresaId().longValue() == usuarioDTO.getEmpresaId().longValue()) {
-			productoMaterial.setCantidad(modifyProductoMaterialDTO.getCantidad());
-			productoMaterial.setTipoUnidad(ProductoMapper.INSTANCE.tipoUnidadDTOToTipoUnidad(modifyProductoMaterialDTO.getTipoUnidad()));
-			productoMaterialRepository.save(productoMaterial);
+		Optional<ProductoMaterial> productoMaterial = productoMaterialRepository.findById(modifyProductoMaterialDTO.getProductoMaterialId());
+		if (!productoMaterial.isPresent()) {
+			return new ResponseEntity<>(HttpStatus.OK);
+		}
+		Producto producto = productoRepository.findById(productoMaterial.get().getProducto().getProductoId()).get();
+		
+		
+		if (producto.getEmpresa().getEmpresaId().longValue() == usuarioDTO.getEmpresaId().longValue()) {
+			productoMaterial.get().setCantidad(modifyProductoMaterialDTO.getCantidad());
+			productoMaterial.get().setTipoUnidad(ProductoMapper.INSTANCE.tipoUnidadDTOToTipoUnidad(modifyProductoMaterialDTO.getTipoUnidad()));
+			productoMaterialRepository.save(productoMaterial.get());
 			return new ResponseEntity<>(HttpStatus.OK);
 		}else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -122,15 +132,21 @@ public class ProductoMaterialController {
 		
 	}
 	
+	//DONE
 	@RequestMapping(value="delete", method = RequestMethod.DELETE)
 	public ResponseEntity<?> deleteProductoMaterial(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @Min(value = 1) @RequestParam(value = "productoMaterialId") Long productoMaterialId) {
 		
 		if (usuarioDTO.getEmpresaId() == null) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
-		ProductoMaterial productoMaterial = productoMaterialRepository.findById(productoMaterialId).get();
-		if (productoMaterial.getProducto().getEmpresa().getEmpresaId().longValue() == usuarioDTO.getEmpresaId().longValue()) {
-			productoMaterialRepository.delete(productoMaterial);
+		Optional<ProductoMaterial> productoMaterial = productoMaterialRepository.findById(productoMaterialId);
+		if (!productoMaterial.isPresent()) {
+			return new ResponseEntity<>(HttpStatus.OK);
+		}
+		Producto producto = productoRepository.findById(productoMaterial.get().getProducto().getProductoId()).get();
+		
+		if (producto.getEmpresa().getEmpresaId().longValue() == usuarioDTO.getEmpresaId().longValue()) {
+			productoMaterialRepository.delete(productoMaterial.get());
 			return new ResponseEntity<>(HttpStatus.OK);
 		}else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);

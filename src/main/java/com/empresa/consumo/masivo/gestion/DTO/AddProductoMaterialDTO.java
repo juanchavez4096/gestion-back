@@ -1,6 +1,7 @@
 package com.empresa.consumo.masivo.gestion.DTO;
 // Generated 28/12/2018 07:26:27 PM by Hibernate Tools 5.3.6.Final
 
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -17,6 +18,7 @@ public class AddProductoMaterialDTO implements java.io.Serializable {
 	@Min(value = 1)
 	private Long productoId;
 	@NotNull
+	@Valid
 	private TipoUnidadDTO tipoUnidad;
 	@NotNull
 	@Min(value = 0)

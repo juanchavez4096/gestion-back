@@ -43,6 +43,13 @@ public interface ProductoMapper {
 	//To Entity
 	
 	Material materialDTOToMaterial(MaterialDTO materialDTO);
+	@Mappings({
+		@Mapping(target = "tipo", ignore = true),
+		@Mapping(target = "unidad", ignore = true),
+		@Mapping(target = "referenciaEnGramos", ignore = true),
+		@Mapping(target = "materials", ignore = true),
+		@Mapping(target = "productoMaterials", ignore = true)
+	   }) 
 	TipoUnidad tipoUnidadDTOToTipoUnidad(TipoUnidadDTO tipoUnidadDTO);
 	TipoMaterial tipoMaterialDTOToTipoMaterial(TipoMaterialDTO tipoMaterialDTO);
 }

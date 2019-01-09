@@ -10,7 +10,7 @@ public class ProductoMaterialDTO implements java.io.Serializable {
 	private Long productoMaterialId;
 	private MaterialDTO material;
 	private TipoUnidadDTO tipoUnidad;
-	private double cantidad;
+	private Double cantidad;
 
 	public ProductoMaterialDTO() {
 	}
@@ -45,11 +45,11 @@ public class ProductoMaterialDTO implements java.io.Serializable {
 		this.tipoUnidad = tipoUnidad;
 	}
 
-	public double getCantidad() {
+	public Double getCantidad() {
 		return cantidad;
 	}
 
-	public void setCantidad(double cantidad) {
+	public void setCantidad(Double cantidad) {
 		this.cantidad = cantidad;
 	}
 

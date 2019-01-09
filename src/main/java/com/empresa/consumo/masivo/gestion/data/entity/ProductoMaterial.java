@@ -5,9 +5,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 /**
@@ -18,9 +20,11 @@ import javax.persistence.Table;
 public class ProductoMaterial implements java.io.Serializable {
 
 	@Id
-	@GeneratedValue
+	@SequenceGenerator(name="pk_sequence_producto_material",sequenceName="gestion.producto_material_id_sequence", allocationSize=1)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="pk_sequence_producto_material")
+	
 	@Column(name = "producto_material_id", nullable = false)
-	private int productoMaterialId;
+	private Long productoMaterialId;
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "material_id", nullable = false)
 	private Material material;
@@ -31,12 +35,12 @@ public class ProductoMaterial implements java.io.Serializable {
     @JoinColumn(name = "tipo_unidad_id", nullable = false)
 	private TipoUnidad tipoUnidad;
 	@Column(name = "cantidad", nullable = false)
-	private double cantidad;
+	private Double cantidad;
 
 	public ProductoMaterial() {
 	}
 
-	public ProductoMaterial(int productoMaterialId, Material material, Producto producto, TipoUnidad tipoUnidad,
+	public ProductoMaterial(Long productoMaterialId, Material material, Producto producto, TipoUnidad tipoUnidad,
 			double cantidad) {
 		this.productoMaterialId = productoMaterialId;
 		this.material = material;
@@ -55,11 +59,11 @@ public class ProductoMaterial implements java.io.Serializable {
 		this.cantidad = cantidad;
 	}
 
-	public int getProductoMaterialId() {
+	public Long getProductoMaterialId() {
 		return productoMaterialId;
 	}
 
-	public void setProductoMaterialId(int productoMaterialId) {
+	public void setProductoMaterialId(Long productoMaterialId) {
 		this.productoMaterialId = productoMaterialId;
 	}
 
@@ -87,11 +91,11 @@ public class ProductoMaterial implements java.io.Serializable {
 		this.tipoUnidad = tipoUnidad;
 	}
 
-	public double getCantidad() {
+	public Double getCantidad() {
 		return cantidad;
 	}
 
-	public void setCantidad(double cantidad) {
+	public void setCantidad(Double cantidad) {
 		this.cantidad = cantidad;
 	}
 
