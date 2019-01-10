@@ -27,7 +27,6 @@ public class ProductoMaterial implements java.io.Serializable {
 	@Id
 	@SequenceGenerator(name="pk_sequence_producto_material",sequenceName="gestion.producto_material_id_sequence", allocationSize=1)
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="pk_sequence_producto_material")
-	
 	@Column(name = "producto_material_id", nullable = false)
 	private Long productoMaterialId;
 	@ManyToOne(fetch = FetchType.LAZY)

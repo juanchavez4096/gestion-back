@@ -23,6 +23,12 @@ spring:
     user:
       name: user
       password: user
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 10MB
+      max-request-size: 10MB
 # Logger configuration
 logging:
   pattern:
@@ -37,4 +43,12 @@ server:
 jwt:
   secret: jqg)[i#|b"7j.$0kH;{UiQ$(@X<!r0dHgJ7GYT.jaF_#*9^E9^ynw!)sdq\|b|~
   sessionTime: 86400
+  
+
+
+## File Storage Properties
+# All files uploaded through the REST API will be stored in this directory
+file: 
+  upload-dir: /home/jchavez/uploads3
+
 
