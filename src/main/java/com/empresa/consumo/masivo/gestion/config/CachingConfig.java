@@ -21,7 +21,7 @@ public class CachingConfig {
 	
 	@Bean
 	public CacheManager cacheManager() {
-        CaffeineCacheManager caffeineCache = new CaffeineCacheManager("imageShort", "imageBig", "imageMed");
+        CaffeineCacheManager caffeineCache = new CaffeineCacheManager("usuarioImageShort", "usuarioImageBig", "usuarioImageMed", "materialImageShort", "materialImageBig", "materialImageMed", "productoImageShort", "productoImageBig", "productoImageMed");
         caffeineCache.setCaffeine(Caffeine.newBuilder().expireAfterAccess(2, TimeUnit.MINUTES).maximumSize(500));
         return caffeineCache;
 	}

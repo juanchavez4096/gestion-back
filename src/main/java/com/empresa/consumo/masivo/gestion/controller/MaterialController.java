@@ -1,23 +1,32 @@
 package com.empresa.consumo.masivo.gestion.controller;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.empresa.consumo.masivo.gestion.DTO.MaterialDTO;
 import com.empresa.consumo.masivo.gestion.DTO.TipoMaterialDTO;
@@ -26,15 +35,21 @@ import com.empresa.consumo.masivo.gestion.DTO.UsuarioDTO;
 import com.empresa.consumo.masivo.gestion.convertor.ProductoMapper;
 import com.empresa.consumo.masivo.gestion.data.entity.Empresa;
 import com.empresa.consumo.masivo.gestion.data.entity.Material;
+import com.empresa.consumo.masivo.gestion.data.entity.Usuario;
 import com.empresa.consumo.masivo.gestion.data.repository.MaterialRepository;
 import com.empresa.consumo.masivo.gestion.data.repository.TipoMaterialRepository;
 import com.empresa.consumo.masivo.gestion.data.repository.TipoUnidadRepository;
+import com.empresa.consumo.masivo.gestion.data.repository.UsuarioRepository;
+import com.empresa.consumo.masivo.gestion.exception.ImageNotFoundException;
+import com.empresa.consumo.masivo.gestion.exception.InvalidFileException;
+import com.empresa.consumo.masivo.gestion.security.JwtService;
+import com.empresa.consumo.masivo.gestion.service.UploadService;
 
 @RestController
 @RequestMapping("api/materiales")
 public class MaterialController {
 	
-	//Logger log = LogManager.getLogger();
+	Logger log = LogManager.getLogger();
 	
 	@Autowired
 	private MaterialRepository materialRepository;
@@ -42,6 +57,12 @@ public class MaterialController {
 	private TipoMaterialRepository tipoMaterialRepository;
 	@Autowired
 	private TipoUnidadRepository tipoUnidadRepository;
+	@Autowired
+    private JwtService jwtService;
+	@Autowired
+	private UsuarioRepository usuarioRepository;
+	@Autowired
+	private UploadService uploadService;
 	
 	//DONE
 	@RequestMapping(value="all", method = RequestMethod.GET)
@@ -140,6 +161,111 @@ public class MaterialController {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
 		
+	}
+	
+	@RequestMapping(path = "file/upload", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file,
+			@RequestParam("token") String token, @RequestParam("materialId") Long materialId)
+			throws IllegalStateException, IOException {
+		
+		Optional<String> userId = jwtService.getSubFromToken(token);
+		if (!userId.isPresent()) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		Optional<Usuario> usuario = usuarioRepository.findById(Integer.parseInt(userId.get()));
+		if(!usuario.isPresent()) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		
+		if (!materialRepository.existsByMaterialIdAndEmpresa_EmpresaId(materialId, usuario.get().getEmpresa().getEmpresaId())) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		
+		if (file.isEmpty())
+			return new ResponseEntity<>("The File cannot be empty", HttpStatus.NOT_ACCEPTABLE);
+
+		if (!file.getContentType().equals(MimeTypeUtils.IMAGE_JPEG_VALUE)
+				&& !file.getContentType().equals(MimeTypeUtils.IMAGE_PNG_VALUE))
+			return new ResponseEntity<>("Invalid File Content Type", HttpStatus.NOT_ACCEPTABLE);
+
+		if (file.getSize() > 2000000)
+			return new ResponseEntity<>("Invalid File Content size: greater than 2MB", HttpStatus.NOT_ACCEPTABLE);
+
+		if (file.getName().length() > 100)
+			return new ResponseEntity<>("Invalid File Content name: name length greater than 100",
+					HttpStatus.NOT_ACCEPTABLE);
+
+		
+		String fileName = uploadService.uploadMaterialImage(file, materialId);
+
+		log.info("Image uploaded with userId " + Long.parseLong(userId.get()));
+
+		return new ResponseEntity<>(fileName, HttpStatus.OK);
+	}
+
+	@RequestMapping(path = "file/download", method = RequestMethod.GET)
+	public ResponseEntity<byte[]> downloadAttachment(@RequestParam("token") String token,@RequestParam("materialId") Long materialId , @RequestParam("size") String size, HttpServletRequest request,
+			HttpServletResponse response) throws IllegalStateException, IOException,
+			InvalidFileException, ImageNotFoundException {
+
+		Optional<String> userId = jwtService.getSubFromToken(token);
+		if (!userId.isPresent()) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		Optional<Usuario> usuario = usuarioRepository.findById(Integer.parseInt(userId.get()));
+		if(!usuario.isPresent()) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		
+		if (!materialRepository.existsByMaterialIdAndEmpresa_EmpresaId(materialId, usuario.get().getEmpresa().getEmpresaId())) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		
+		if (size == null || size.isEmpty())
+			throw new InvalidFileException("The size cannot be empty: " + size);
+
+		if (!size.equals("50x50") && !size.equals("128x128") && !size.equals("500x500") )
+			throw new InvalidFileException("The file size is invalid: " + size);
+		
+
+		log.info("Donwload in controller");
+		if (size.equals("50x50")) {
+			return uploadService.downloadMaterialImageShort(materialId, request, response);
+		} else if (size.equals("500x500")) {
+			return uploadService.downloadMaterialImageBig(materialId, request, response);
+		} else {
+			return uploadService.downloadMaterialImageMed(materialId, request, response);
+		}
+
+	}
+
+	@RequestMapping(path = "file/delete", method = RequestMethod.DELETE)
+	public ResponseEntity<Long> deleteFile(@RequestParam("token") String token, @RequestParam("materialId") Long materialId,
+			 HttpServletRequest request) throws IllegalStateException, IOException,
+			 InvalidFileException {
+
+		Optional<String> userId = jwtService.getSubFromToken(token);
+		if (!userId.isPresent()) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		Optional<Usuario> usuario = usuarioRepository.findById(Integer.parseInt(userId.get()));
+		if(!usuario.isPresent()) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		
+		if (!materialRepository.existsByMaterialIdAndEmpresa_EmpresaId(materialId, usuario.get().getEmpresa().getEmpresaId())) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		
+		/*
+		 * if (fileName == null || fileName.isEmpty()) throw new
+		 * InvalidFileException("File cannot be empty: " + fileName);
+		 */
+
+		Long result = uploadService.deleteMaterialImage(materialId );
+		log.info("Image Deleted by userId: " + Long.parseLong(userId.get()));
+
+		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 	
 	
