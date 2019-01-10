@@ -20,7 +20,6 @@ import com.empresa.consumo.masivo.gestion.data.entity.TipoUnidad;
 public interface ProductoMapper {
 	
 	ProductoMapper INSTANCE = Mappers.getMapper( ProductoMapper.class );
-	
 	//To DTO
 	@Mappings({
 	   }) 
