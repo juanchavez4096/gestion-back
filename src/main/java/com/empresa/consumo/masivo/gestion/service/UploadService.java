@@ -44,14 +44,12 @@ public class UploadService {
 	String location;
 
 	public static final String FOLDER_USER = "users";
-	public static final String FOLDER_GROUP = "groups";
-	public static final String FOLDER_SUPER_GROUPS = "supergroups";
-	public static final String FOLDER_SERVICE = "service";
+	public static final String FOLDER_PRODUCTO = "productos";
+	public static final String FOLDER_MATERIAL = "materiales";
 
-	private void createDirectories(Long serviceId, Long id, String subFolder) {
+	private void createDirectories(Long id, String subFolder) {
 
-		String address = (subFolder.equalsIgnoreCase(FOLDER_SERVICE) ? serviceId + File.separator + subFolder
-				: serviceId + File.separator + subFolder + File.separator + id);
+		String address = subFolder + File.separator + id;
 
 		Path newDirectories = Paths.get(location + File.separator + address).toAbsolutePath().normalize();
 		try {
@@ -61,10 +59,10 @@ public class UploadService {
 		}
 	}
 
-	@Caching(evict = { @CacheEvict(value = "imageShort", key = "{#serviceId,#userId}", condition = "#result!=null"),
-			@CacheEvict(value = "imageBig", key = "{#serviceId,#userId}", condition = "#result!=null"),
-			@CacheEvict(value = "imageMed", key = "{#serviceId,#userId}", condition = "#result!=null") })
-	public String uploadFile(MultipartFile file, Long serviceId, Long userId)
+	@Caching(evict = { @CacheEvict(value = "imageShort", key = "{#userId}", condition = "#result!=null"),
+			@CacheEvict(value = "imageBig", key = "{#userId}", condition = "#result!=null"),
+			@CacheEvict(value = "imageMed", key = "{#userId}", condition = "#result!=null") })
+	public String uploadUserImage(MultipartFile file, Long userId)
 			throws IllegalStateException, IOException {
 
 		
@@ -74,20 +72,25 @@ public class UploadService {
 		BufferedImage image = ImageIO.read(file.getInputStream());
 		BufferedImage imageShort = resize(image, 50, 50);
 		BufferedImage imageMed = resize(image, 128, 128);
+		BufferedImage imageBig = resize(image, 500, 500);
 		
 
 		try {
 			if (fileName.contains("..")) {
 				throw new FileStorageException("Sorry! Filename contains invalid path sequence :" + fileName);
 			}
-			this.createDirectories(serviceId, userId, FOLDER_USER);
-			File outputShort = new File(location + File.separator + serviceId + File.separator + FOLDER_USER
+			this.createDirectories(userId, FOLDER_USER);
+			File outputShort = new File(location + File.separator + FOLDER_USER
 					+ File.separator + userId + File.separator + "50x50.png");
-			File outputMed = new File(location + File.separator + serviceId + File.separator + FOLDER_USER
+			File outputMed = new File(location + File.separator + FOLDER_USER
 					+ File.separator + userId + File.separator + "128x128.png");
+			File outputBig = new File(location + File.separator + FOLDER_USER
+					+ File.separator + userId + File.separator + "500x500.png");
+			
 			
 			ImageIO.write(imageShort, "png", outputShort);
 			ImageIO.write(imageMed, "png", outputMed);
+			ImageIO.write(imageBig, "png", outputBig);
 			
 			log.info("Uploaded image");
 			return fileName;
@@ -97,39 +100,39 @@ public class UploadService {
 		}
 	}
 
-	@Cacheable(value = "imageShort", key = "{#serviceId,#userId}", unless = "#result == null")
-	public ResponseEntity<byte[]> downloadShort(Long serviceId, Long userId, HttpServletRequest request,
+	@Cacheable(value = "imageShort", key = "{#userId}", unless = "#result == null")
+	public ResponseEntity<byte[]> downloadUserImageShort(Long userId, HttpServletRequest request,
 			HttpServletResponse response)
 			throws ImageNotFoundException, IOException {
 		String fileName = "50x50.png";
-		return this.download(serviceId, userId, fileName, request, response);
+		return this.downloadUserImage(userId, fileName, request, response);
 	}
 
-	@Cacheable(value = "imageBig", key = "{#serviceId,#userId}", unless = "#result == null")
-	public ResponseEntity<byte[]> downloadBig(Long serviceId, Long userId, HttpServletRequest request,
+	@Cacheable(value = "imageBig", key = "{#userId}", unless = "#result == null")
+	public ResponseEntity<byte[]> downloadUserImageBig(Long userId, HttpServletRequest request,
 			HttpServletResponse response)
 			throws  ImageNotFoundException, IOException {
 		String fileName = "500x500.png";
-		return this.download(serviceId, userId, fileName, request, response);
+		return this.downloadUserImage( userId, fileName, request, response);
 	}
 
 	
 
-	@Cacheable(value = "imageMed", key = "{#serviceId,#userId}", unless = "#result == null")
-	public ResponseEntity<byte[]> downloadMed(Long serviceId, Long userId, HttpServletRequest request,
+	@Cacheable(value = "imageMed", key = "{#userId}", unless = "#result == null")
+	public ResponseEntity<byte[]> downloadUserImageMed(Long userId, HttpServletRequest request,
 			HttpServletResponse response)
 			throws ImageNotFoundException, IOException {
 		String fileName = "128x128.png";
-		return this.download(serviceId, userId, fileName, request, response);
+		return this.downloadUserImage(userId, fileName, request, response);
 	}
 
-	private ResponseEntity<byte[]> download(Long serviceId, Long userId, String fileName, HttpServletRequest request,
+	private ResponseEntity<byte[]> downloadUserImage(Long userId, String fileName, HttpServletRequest request,
 			HttpServletResponse response)
 			throws IOException, ImageNotFoundException {
 
 		ServletContext context = request.getSession().getServletContext();
 		// String appPath = context.getRealPath("");
-		String filePath = location + File.separator + serviceId + File.separator + FOLDER_USER + File.separator + userId
+		String filePath = location + File.separator + FOLDER_USER + File.separator + userId
 				+ File.separator + fileName;
 		String fullPath = filePath;
 		File downloadFile = new File(fullPath);
@@ -170,14 +173,14 @@ public class UploadService {
 		
 	}
 
-	@Caching(evict = { @CacheEvict(value = "imageShort", key = "{#serviceId,#userId}", condition = "#result!=null"),
-			@CacheEvict(value = "imageBig", key = "{#serviceId,#userId}", condition = "#result!=null"),
-			@CacheEvict(value = "imageMed", key = "{#serviceId,#userId}", condition = "#result!=null") })
-	public Long deleteFile(Long serviceId, Long userId) {
+	@Caching(evict = { @CacheEvict(value = "imageShort", key = "{#userId}", condition = "#result!=null"),
+			@CacheEvict(value = "imageBig", key = "{#userId}", condition = "#result!=null"),
+			@CacheEvict(value = "imageMed", key = "{#userId}", condition = "#result!=null") })
+	public Long deleteUserImage( Long userId) {
 
 		Long result = 0l;
 		Path directory = Paths
-				.get(location + File.separator + serviceId + File.separator + FOLDER_USER + File.separator + userId)
+				.get(location + File.separator + FOLDER_USER + File.separator + userId)
 				.toAbsolutePath().normalize();
 		// Path fileDirectory = directory.resolve(fileName);
 
