@@ -108,17 +108,9 @@ public class UsuarioController {
 	
 
 	@RequestMapping(path = "file/upload", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file,
-			@RequestParam("token") String token)
+	public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UsuarioDTO usuarioDTO)
 			throws IllegalStateException, IOException {
 		
-		Optional<String> userId = jwtService.getSubFromToken(token);
-		if (!userId.isPresent()) {
-			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-		}
-		if(!usuarioRepository.findById(Integer.parseInt(userId.get())).isPresent()) {
-			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-		}
 		
 		if (file.isEmpty())
 			return new ResponseEntity<>("The File cannot be empty", HttpStatus.NOT_ACCEPTABLE);
@@ -135,9 +127,9 @@ public class UsuarioController {
 					HttpStatus.NOT_ACCEPTABLE);
 
 		
-		String fileName = uploadService.uploadUserImage(file, Long.parseLong(userId.get()));
+		String fileName = uploadService.uploadUserImage(file, usuarioDTO.getUsuarioId());
 
-		log.info("Image uploaded with userId " + Long.parseLong(userId.get()));
+		log.info("Image uploaded with userId " + usuarioDTO.getUsuarioId());
 
 		return new ResponseEntity<>(fileName, HttpStatus.OK);
 	}
@@ -174,25 +166,12 @@ public class UsuarioController {
 	}
 
 	@RequestMapping(path = "file/delete", method = RequestMethod.DELETE)
-	public ResponseEntity<Long> deleteFile(@RequestParam("token") String token,
+	public ResponseEntity<Long> deleteFile(@AuthenticationPrincipal UsuarioDTO usuarioDTO,
 			 HttpServletRequest request) throws IllegalStateException, IOException,
 			 InvalidFileException {
 
-		Optional<String> userId = jwtService.getSubFromToken(token);
-		if (!userId.isPresent()) {
-			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-		}
-		if(!usuarioRepository.findById(Integer.parseInt(userId.get())).isPresent()) {
-			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-		}
-		
-		/*
-		 * if (fileName == null || fileName.isEmpty()) throw new
-		 * InvalidFileException("File cannot be empty: " + fileName);
-		 */
-
-		Long result = uploadService.deleteUserImage(Long.parseLong(userId.get()) );
-		log.info("Image Deleted by userId: " + Long.parseLong(userId.get()));
+		Long result = uploadService.deleteUserImage(usuarioDTO.getUsuarioId() );
+		log.info("Image Deleted by userId: " + usuarioDTO.getUsuarioId());
 
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}

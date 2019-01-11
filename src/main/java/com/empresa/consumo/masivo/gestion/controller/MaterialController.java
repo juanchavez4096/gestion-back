@@ -165,19 +165,11 @@ public class MaterialController {
 	
 	@RequestMapping(path = "file/upload", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file,
-			@RequestParam("token") String token, @RequestParam("materialId") Long materialId)
+			 @RequestParam("materialId") String materialId, @AuthenticationPrincipal UsuarioDTO usuarioDTO)
 			throws IllegalStateException, IOException {
 		
-		Optional<String> userId = jwtService.getSubFromToken(token);
-		if (!userId.isPresent()) {
-			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-		}
-		Optional<Usuario> usuario = usuarioRepository.findById(Integer.parseInt(userId.get()));
-		if(!usuario.isPresent()) {
-			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-		}
 		
-		if (!materialRepository.existsByMaterialIdAndEmpresa_EmpresaId(materialId, usuario.get().getEmpresa().getEmpresaId())) {
+		if (!materialRepository.existsByMaterialIdAndEmpresa_EmpresaId(Long.parseLong(materialId), usuarioDTO.getEmpresaId())) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 		
@@ -196,15 +188,15 @@ public class MaterialController {
 					HttpStatus.NOT_ACCEPTABLE);
 
 		
-		String fileName = uploadService.uploadMaterialImage(file, materialId);
+		String fileName = uploadService.uploadMaterialImage(file, Long.parseLong(materialId));
 
-		log.info("Image uploaded with userId " + Long.parseLong(userId.get()));
+		log.info("Image uploaded with userId " + usuarioDTO.getUsuarioId());
 
 		return new ResponseEntity<>(fileName, HttpStatus.OK);
 	}
 
 	@RequestMapping(path = "file/download", method = RequestMethod.GET)
-	public ResponseEntity<byte[]> downloadAttachment(@RequestParam("token") String token,@RequestParam("materialId") Long materialId , @RequestParam("size") String size, HttpServletRequest request,
+	public ResponseEntity<byte[]> downloadAttachment(@RequestParam("token") String token,@RequestParam("materialId") String materialId , @RequestParam("size") String size, HttpServletRequest request,
 			HttpServletResponse response) throws IllegalStateException, IOException,
 			InvalidFileException, ImageNotFoundException {
 
@@ -217,7 +209,7 @@ public class MaterialController {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 		
-		if (!materialRepository.existsByMaterialIdAndEmpresa_EmpresaId(materialId, usuario.get().getEmpresa().getEmpresaId())) {
+		if (!materialRepository.existsByMaterialIdAndEmpresa_EmpresaId(Long.parseLong(materialId), usuario.get().getEmpresa().getEmpresaId())) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 		
@@ -230,40 +222,28 @@ public class MaterialController {
 
 		log.info("Donwload in controller");
 		if (size.equals("50x50")) {
-			return uploadService.downloadMaterialImageShort(materialId, request, response);
+			return uploadService.downloadMaterialImageShort(Long.parseLong(materialId), request, response);
 		} else if (size.equals("500x500")) {
-			return uploadService.downloadMaterialImageBig(materialId, request, response);
+			return uploadService.downloadMaterialImageBig(Long.parseLong(materialId), request, response);
 		} else {
-			return uploadService.downloadMaterialImageMed(materialId, request, response);
+			return uploadService.downloadMaterialImageMed(Long.parseLong(materialId), request, response);
 		}
 
 	}
 
 	@RequestMapping(path = "file/delete", method = RequestMethod.DELETE)
-	public ResponseEntity<Long> deleteFile(@RequestParam("token") String token, @RequestParam("materialId") Long materialId,
+	public ResponseEntity<Long> deleteFile(@RequestParam("materialId") String materialId, @AuthenticationPrincipal UsuarioDTO usuarioDTO,
 			 HttpServletRequest request) throws IllegalStateException, IOException,
 			 InvalidFileException {
 
-		Optional<String> userId = jwtService.getSubFromToken(token);
-		if (!userId.isPresent()) {
-			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-		}
-		Optional<Usuario> usuario = usuarioRepository.findById(Integer.parseInt(userId.get()));
-		if(!usuario.isPresent()) {
-			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-		}
 		
-		if (!materialRepository.existsByMaterialIdAndEmpresa_EmpresaId(materialId, usuario.get().getEmpresa().getEmpresaId())) {
+		
+		if (!materialRepository.existsByMaterialIdAndEmpresa_EmpresaId(Long.parseLong(materialId), usuarioDTO.getEmpresaId())) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
-		
-		/*
-		 * if (fileName == null || fileName.isEmpty()) throw new
-		 * InvalidFileException("File cannot be empty: " + fileName);
-		 */
 
-		Long result = uploadService.deleteMaterialImage(materialId );
-		log.info("Image Deleted by userId: " + Long.parseLong(userId.get()));
+		Long result = uploadService.deleteMaterialImage(Long.parseLong(materialId));
+		log.info("Image Deleted by userId: " + usuarioDTO.getUsuarioId());
 
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
