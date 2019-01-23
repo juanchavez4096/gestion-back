@@ -22,6 +22,7 @@ public interface ProductoMapper {
 	ProductoMapper INSTANCE = Mappers.getMapper( ProductoMapper.class );
 	//To DTO
 	@Mappings({
+			@Mapping(target = "costo", ignore = true)
 	   }) 
 	ProductoDTO productoToProductoDTO(Producto producto); 
 	@Mappings({
@@ -40,7 +41,12 @@ public interface ProductoMapper {
 	TipoMaterialDTO tipoMaterialToTipoMaterialDTO(TipoMaterial tipoMaterial);
 	
 	//To Entity
-	
+
+	@Mappings({
+			@Mapping(target = "activo", ignore = true),
+			@Mapping(target = "empresa", ignore = true),
+			@Mapping(target = "productoMaterials", ignore = true)
+	})
 	Material materialDTOToMaterial(MaterialDTO materialDTO);
 	@Mappings({
 		@Mapping(target = "tipo", ignore = true),
@@ -50,5 +56,10 @@ public interface ProductoMapper {
 		@Mapping(target = "productoMaterials", ignore = true)
 	   }) 
 	TipoUnidad tipoUnidadDTOToTipoUnidad(TipoUnidadDTO tipoUnidadDTO);
+
+	@Mappings({
+			@Mapping(target = "empresa", ignore = true),
+			@Mapping(target = "materials", ignore = true)
+	})
 	TipoMaterial tipoMaterialDTOToTipoMaterial(TipoMaterialDTO tipoMaterialDTO);
 }
