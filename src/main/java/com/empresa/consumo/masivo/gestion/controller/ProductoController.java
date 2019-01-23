@@ -22,6 +22,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -125,14 +128,30 @@ public class ProductoController {
 	}
 	
 	//DONE
-	@RequestMapping(value="add", method = RequestMethod.POST)
-	public ResponseEntity<ProductoDTO> addProducto(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @NotEmpty @RequestParam(value = "nombre") String nombre) {
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, readOnly = false, rollbackFor = {
+			Exception.class })
+	@RequestMapping(value="add", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<?> addProducto(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @NotEmpty @RequestParam(value = "nombre") String nombre,
+			@RequestParam(value = "file", required = false) MultipartFile file) {
 		
 		if (usuarioDTO.getEmpresaId() == null) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 		
+		if (file != null) {
+			ResponseEntity<String> responseEntity = this.validateFile(file);
+			if (responseEntity != null ) {
+				return responseEntity;
+			}
+		}
+		
+		
+		
 		ProductoDTO savedProducto = ProductoMapper.INSTANCE.productoToProductoDTO(productoRepository.save(new Producto(new Empresa(usuarioDTO.getEmpresaId()), nombre.trim() ))) ;
+		if (file != null) {
+			String fileName = uploadService.uploadProductoImage(file, savedProducto.getProductoId());
+		}
+		
 		
 		return new ResponseEntity<>(savedProducto, HttpStatus.CREATED);
 	}
@@ -183,19 +202,12 @@ public class ProductoController {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 		
-		if (file.isEmpty())
-			return new ResponseEntity<>("The File cannot be empty", HttpStatus.NOT_ACCEPTABLE);
-
-		if (!file.getContentType().equals(MimeTypeUtils.IMAGE_JPEG_VALUE)
-				&& !file.getContentType().equals(MimeTypeUtils.IMAGE_PNG_VALUE))
-			return new ResponseEntity<>("Invalid File Content Type", HttpStatus.NOT_ACCEPTABLE);
-
-		if (file.getSize() > 2000000)
-			return new ResponseEntity<>("Invalid File Content size: greater than 2MB", HttpStatus.NOT_ACCEPTABLE);
-
-		if (file.getName().length() > 100)
-			return new ResponseEntity<>("Invalid File Content name: name length greater than 100",
-					HttpStatus.NOT_ACCEPTABLE);
+		ResponseEntity<String> responseEntity = this.validateFile(file);
+		if (responseEntity != null ) {
+			return responseEntity;
+		}
+		
+		
 
 		
 		String fileName = uploadService.uploadProductoImage(file, Long.parseLong(productoId));
@@ -256,6 +268,23 @@ public class ProductoController {
 		log.info("Image Deleted by userId: " + usuarioDTO.getUsuarioId());
 
 		return new ResponseEntity<>(result, HttpStatus.OK);
+	}
+	
+	private ResponseEntity<String> validateFile(MultipartFile file) {
+		if (file.isEmpty())
+			return new ResponseEntity<>("The File cannot be empty", HttpStatus.NOT_ACCEPTABLE);
+
+		if (!file.getContentType().equals(MimeTypeUtils.IMAGE_JPEG_VALUE)
+				&& !file.getContentType().equals(MimeTypeUtils.IMAGE_PNG_VALUE))
+			return new ResponseEntity<>("Invalid File Content Type", HttpStatus.NOT_ACCEPTABLE);
+
+		if (file.getSize() > 2000000)
+			return new ResponseEntity<>("Invalid File Content size: greater than 2MB", HttpStatus.NOT_ACCEPTABLE);
+
+		if (file.getName().length() > 100)
+			return new ResponseEntity<>("Invalid File Content name: name length greater than 100",
+					HttpStatus.NOT_ACCEPTABLE);
+		return null;
 	}
 	
 }
