@@ -132,7 +132,7 @@ public class ProductoController {
 			Exception.class })
 	@RequestMapping(value="add", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> addProducto(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @NotEmpty @RequestParam(value = "nombre") String nombre,
-			@RequestParam(value = "file", required = false) MultipartFile file) {
+			@RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
 		
 		if (usuarioDTO.getEmpresaId() == null) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);

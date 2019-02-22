@@ -40,6 +40,8 @@ public class Usuario implements java.io.Serializable {
 	private String email;
 	@Column(name = "password", nullable = false)
 	private String password;
+	@Column(name = "enabled", nullable = false)
+	private Boolean enabled;
 
 	public Usuario() {
 	}
@@ -47,6 +49,15 @@ public class Usuario implements java.io.Serializable {
 	public Usuario(int usuarioId, Empresa empresa, TipoUsuario tipoUsuario, String nombre, String email,
 			String password) {
 		this.usuarioId = usuarioId;
+		this.empresa = empresa;
+		this.tipoUsuario = tipoUsuario;
+		this.nombre = nombre;
+		this.email = email;
+		this.password = password;
+	}
+
+	public Usuario(Empresa empresa, TipoUsuario tipoUsuario, String nombre, String email,
+				   String password) {
 		this.empresa = empresa;
 		this.tipoUsuario = tipoUsuario;
 		this.nombre = nombre;

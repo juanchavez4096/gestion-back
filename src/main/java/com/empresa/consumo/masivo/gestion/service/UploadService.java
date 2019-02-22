@@ -248,7 +248,6 @@ public class UploadService {
 		Long result = 0l;
 		Path directory = Paths.get(location + File.separator + folder + File.separator + id).toAbsolutePath()
 				.normalize();
-		// Path fileDirectory = directory.resolve(fileName);
 
 		try {
 			Files.walk(directory).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);

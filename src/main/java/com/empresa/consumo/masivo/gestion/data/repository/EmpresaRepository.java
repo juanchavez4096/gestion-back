@@ -10,4 +10,5 @@ public interface EmpresaRepository extends CrudRepository<Empresa, Long> {
 
 	Page<Empresa> findBy(Pageable pageable);
 	Long existsByProductos_ProductoId(Long productoId);
+
 }

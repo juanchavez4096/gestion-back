@@ -31,6 +31,8 @@ public class Empresa implements java.io.Serializable {
 	private Long empresaId;
 	@Column(name = "nombre", nullable = false)
 	private String nombre;
+	@Column(name = "enabled", nullable = false)
+	private Boolean enabled;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "empresa")
 	private Set<TipoMaterial> tipoMaterials = new HashSet<>(0);
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "empresa")
@@ -51,6 +53,12 @@ public class Empresa implements java.io.Serializable {
 	public Empresa(String nombre) {
 		super();
 		this.nombre = nombre;
+	}
+
+	public Empresa(Long empresaId, String nombre, Boolean enabled) {
+		this.empresaId = empresaId;
+		this.nombre = nombre;
+		this.enabled = enabled;
 	}
 
 	public Empresa(Long empresaId, String nombre) {

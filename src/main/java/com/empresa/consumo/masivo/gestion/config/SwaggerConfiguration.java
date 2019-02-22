@@ -74,16 +74,4 @@ public class SwaggerConfiguration {
                 UiConfiguration.Constants.DEFAULT_SUBMIT_METHODS, false, true, 60000L);
     }*/
 
-    /**
-     * Method to Only select apis that matches the given Predicates.
-     * @return
-     */
-    private Predicate<String> paths() {
-        // Match all paths except /error
-        return Predicates.and(
-                //PathSelectors.regex("/.*"),
-                PathSelectors.ant("/api/users/*"),
-                //PathSelectors.regex("/api/services/*"),
-                Predicates.not(PathSelectors.regex("/error.*")));
-    }
 }

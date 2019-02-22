@@ -23,7 +23,7 @@ public interface ProductoMapper {
 	//To DTO
 	@Mappings({
 			@Mapping(target = "costo", ignore = true)
-	   }) 
+	   })
 	ProductoDTO productoToProductoDTO(Producto producto); 
 	@Mappings({
 		@Mapping(target = "material", expression = "java( new MaterialDTO( productoMaterial.getMaterial().getMaterialId() ) )"),
