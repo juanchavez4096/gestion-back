@@ -1,9 +1,9 @@
 package com.empresa.consumo.masivo.gestion.DTO;
 
-import java.io.Serializable;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serializable;
 
 @Getter
 @Setter
@@ -20,7 +20,4 @@ public class UserWithToken implements Serializable {
         this.nombre = usuarioDTO.getNombre();
         this.token = token;
     }
-
-	
-
 }

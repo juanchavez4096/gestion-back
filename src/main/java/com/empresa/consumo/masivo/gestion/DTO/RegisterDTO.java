@@ -1,13 +1,12 @@
 package com.empresa.consumo.masivo.gestion.DTO;
 
-import java.io.Serializable;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-
-import lombok.Getter;
-import lombok.Setter;
+import java.io.Serializable;
 
 @Getter
 @Setter
