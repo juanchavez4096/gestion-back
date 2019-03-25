@@ -6,6 +6,6 @@ import com.empresa.consumo.masivo.gestion.data.entity.Usuario;
 
 public interface UsuarioRepository extends CrudRepository<Usuario, Integer> {
 
-	Usuario findByEmailAndEnabled(String email, Boolean enabled);
+	Usuario findByEmailAndEnabledAndEmpresa_Enabled(String email, Boolean enabled, Boolean empresaEnabled);
 	Boolean existsByEmail(String email);
 }

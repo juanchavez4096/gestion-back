@@ -6,6 +6,8 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,11 +57,7 @@ public class UsuarioController {
 	
 	@RequestMapping(value="login", method=RequestMethod.POST)
 	public ResponseEntity<UserWithToken> getUsuarioById(@Valid @RequestBody LoginDTO loginDTO) {
-		Usuario usuario = usuarioRepository.findByEmailAndEnabled(loginDTO.getEmail(), Boolean.TRUE);
-
-		if (!usuario.getEmpresa().getEnabled()){
-			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-		}
+		Usuario usuario = usuarioRepository.findByEmailAndEnabledAndEmpresa_Enabled(loginDTO.getEmail(), Boolean.TRUE, Boolean.TRUE);
 
 		UsuarioDTO usuarioDTO = UsuarioMapper.INSTANCE
 									.usuarioToUsuarioDTO(usuario);
@@ -75,6 +73,17 @@ public class UsuarioController {
 		}
 		
 	}
+
+	@RequestMapping(value="currentUser", method=RequestMethod.GET)
+	public ResponseEntity<UsuarioDTO> currentUser(@AuthenticationPrincipal UsuarioDTO usuarioDTO) {
+
+		usuarioDTO.setPassword(null);
+		usuarioDTO.setEmpresaId(null);
+		usuarioDTO.setUsuarioId(null);
+		return new ResponseEntity<>(usuarioDTO, HttpStatus.OK);
+	}
+
+
 	
 	@RequestMapping(value="register", method=RequestMethod.POST)
 	public ResponseEntity<?> register(@Valid @RequestBody RegisterDTO registerDTO, @AuthenticationPrincipal UsuarioDTO usuarioDTO) {
@@ -88,6 +97,7 @@ public class UsuarioController {
 		newUsuario.setEmpresa(new Empresa(usuarioDTO.getEmpresaId()));
 		newUsuario.setTipoUsuario(new TipoUsuario(usuarioDTO.getTipoUsuario().getTipoUsuarioId()));
 		newUsuario.setPassword(encryptService.encrypt(newUsuario.getPassword()));
+		newUsuario.setEnabled(Boolean.TRUE);
 		usuarioRepository.save(newUsuario);
 		
 		UsuarioDTO newUsuarioDTO = UsuarioMapper.INSTANCE.usuarioToUsuarioDTO(newUsuario);
@@ -110,13 +120,27 @@ public class UsuarioController {
 		}
 		
 	}*/
+
+	@RequestMapping(value="changePassword", method=RequestMethod.POST)
+	public ResponseEntity<Void> changePassword(@NotEmpty @RequestParam(value = "currentPassword") String currentPassword, @NotEmpty @RequestParam(value = "newPassword") String newPassword, @AuthenticationPrincipal UsuarioDTO usuarioDTO) {
+
+		if (encryptService.check(currentPassword, usuarioDTO.getPassword())){
+			usuarioDTO.setPassword(encryptService.encrypt(newPassword));
+			Usuario usuario = UsuarioMapper.INSTANCE.usuarioDTOToUsuario(usuarioDTO);
+			usuario.setEnabled(Boolean.TRUE);
+			usuarioRepository.save(usuario);
+			return new ResponseEntity<>(HttpStatus.OK);
+		}else{
+			return new ResponseEntity<>(HttpStatus.CONFLICT);
+		}
+	}
 	
 	
 
 	@RequestMapping(path = "file/upload", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UsuarioDTO usuarioDTO)
 			throws IllegalStateException, IOException {
-		
+
 		
 		if (file.isEmpty())
 			return new ResponseEntity<>("The File cannot be empty", HttpStatus.NOT_ACCEPTABLE);

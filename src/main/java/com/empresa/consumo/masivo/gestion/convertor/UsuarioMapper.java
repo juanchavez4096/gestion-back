@@ -19,6 +19,11 @@ public interface UsuarioMapper {
 	       @Mapping(source = "empresa.empresaId", target = "empresaId")
 	   }) 
 	UsuarioDTO usuarioToUsuarioDTO(Usuario usuario);
+
+	@Mappings({
+			@Mapping(target = "empresa.empresaId", source = "empresaId")
+	})
+	Usuario usuarioDTOToUsuario(UsuarioDTO usuarioDTO);
 	
 	TipoUsuarioDTO tipoUsuarioToTipoUsuarioDTO(TipoUsuario tipoUsuario);
 	

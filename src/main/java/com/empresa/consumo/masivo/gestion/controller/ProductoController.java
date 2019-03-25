@@ -81,12 +81,12 @@ public class ProductoController {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 		Page<ProductoDTO> pageProductos = productoRepository.findByEmpresa_EmpresaIdAndActivo(usuarioDTO.getEmpresaId(), true, pageable)
-				.map(producto -> ProductoMapper.INSTANCE.productoToProductoDTO(producto));
+				.map(ProductoMapper.INSTANCE::productoToProductoDTO);
 		
 		for (ProductoDTO productoDTO: pageProductos.getContent()) {
 			List<ProductoMaterialDTO> pageProductosMateriales = productoMaterialRepository.findByProducto_Empresa_EmpresaIdAndProducto_ProductoId(usuarioDTO.getEmpresaId(), productoDTO.getProductoId())
 					.stream()
-					.map(productoMaterial -> ProductoMapper.INSTANCE.productoMaterialToProductoMaterialDTO(productoMaterial))
+					.map(ProductoMapper.INSTANCE::productoMaterialToProductoMaterialDTO)
 					.collect(Collectors.toList());
 			
 			log.info(pageProductosMateriales.stream().map(ProductoMaterialDTO::getProductoMaterialId).collect(Collectors.toList()) + ": productoMaterialId");
@@ -95,12 +95,12 @@ public class ProductoController {
 			
 			Map<Long, TipoUnidadDTO> tipoUnidadMap = tipoUnidadRepository.findByTipoUnidadIdIn(tipoUnidadIds)
 					.stream()
-					.map(t -> ProductoMapper.INSTANCE.tipoUnidadToTipoUnidadDTO(t))
+					.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
 					.collect(Collectors.toMap(TipoUnidadDTO::getTipoUnidadId, t -> t));
 			
 			Map<Long, MaterialDTO> materialMap = materialRepository.findByMaterialIdIn(materialIds)
 					.stream()
-					.map(m -> ProductoMapper.INSTANCE.materialToMaterialDTO(m))
+					.map(ProductoMapper.INSTANCE::materialToMaterialDTO)
 					.collect(Collectors.toMap(MaterialDTO::getMaterialId, m -> m));
 			
 			pageProductosMateriales.forEach(p -> {

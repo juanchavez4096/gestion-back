@@ -61,14 +61,26 @@ public class EmpresaController {
 	private UploadService uploadService;
 
 	@RequestMapping(value="all", method=RequestMethod.GET)
-	public ResponseEntity<Page<EmpresaDTO>> register(Pageable pageable, @AuthenticationPrincipal UsuarioDTO usuarioDTO) {
+	public ResponseEntity<Page<EmpresaDTO>> all(Pageable pageable, @AuthenticationPrincipal UsuarioDTO usuarioDTO) {
 
 
 		if (usuarioDTO.getEmpresaId() != null) {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
-		Page<EmpresaDTO> empresaDTOPage = empresaRepository.findBy(pageable).map(e -> EmpresaMapper.INSTANCE.empresaToEmpresaDTO(e));
+		Page<EmpresaDTO> empresaDTOPage = empresaRepository.findBy(pageable).map(EmpresaMapper.INSTANCE::empresaToEmpresaDTO);
 		return new ResponseEntity<>( empresaDTOPage, HttpStatus.OK);
+	}
+
+	@RequestMapping(value="myEmpresa", method=RequestMethod.GET)
+	public ResponseEntity<EmpresaDTO> myEmpresa(@AuthenticationPrincipal UsuarioDTO usuarioDTO) {
+
+
+		if (usuarioDTO.getEmpresaId() == null) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		EmpresaDTO empresaDTO = null;
+		empresaRepository.findById(usuarioDTO.getEmpresaId()).ifPresent(EmpresaMapper.INSTANCE::empresaToEmpresaDTO);
+		return new ResponseEntity<>( empresaDTO, HttpStatus.OK);
 	}
 
 	@RequestMapping(value="register", method=RequestMethod.POST)
