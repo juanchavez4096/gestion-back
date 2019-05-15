@@ -82,49 +82,74 @@ public class ProductoController {
 		}
 		Page<ProductoDTO> pageProductos = productoRepository.findByEmpresa_EmpresaIdAndActivo(usuarioDTO.getEmpresaId(), true, pageable)
 				.map(ProductoMapper.INSTANCE::productoToProductoDTO);
+
+		Page<ProductoDTO> newPageProductos = doLogic(pageProductos, usuarioDTO);
 		
+		
+		return new ResponseEntity<>(newPageProductos, HttpStatus.OK);
+	}
+
+	@RequestMapping(value="byId", method = RequestMethod.GET)
+	public ResponseEntity<ProductoDTO> getById(@AuthenticationPrincipal UsuarioDTO usuarioDTO,@Min(value = 1) @RequestParam(value = "productoId") Long productoId,Pageable pageable) {
+
+		if (usuarioDTO.getEmpresaId() == null) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		Page<ProductoDTO> pageProductos = productoRepository.findByProductoIdAndEmpresa_EmpresaIdAndActivo(productoId, usuarioDTO.getEmpresaId(), true, pageable)
+				.map(ProductoMapper.INSTANCE::productoToProductoDTO);
+
+		Page<ProductoDTO> newPageProductos = doLogic(pageProductos, usuarioDTO);
+
+		if (pageProductos.isEmpty()){
+			return new ResponseEntity<>(null, HttpStatus.OK);
+		}else{
+			return new ResponseEntity<>(newPageProductos.getContent().get(0), HttpStatus.OK);
+		}
+
+
+	}
+
+	private Page<ProductoDTO> doLogic(Page<ProductoDTO> pageProductos, UsuarioDTO usuarioDTO){
 		for (ProductoDTO productoDTO: pageProductos.getContent()) {
 			List<ProductoMaterialDTO> pageProductosMateriales = productoMaterialRepository.findByProducto_Empresa_EmpresaIdAndProducto_ProductoId(usuarioDTO.getEmpresaId(), productoDTO.getProductoId())
 					.stream()
 					.map(ProductoMapper.INSTANCE::productoMaterialToProductoMaterialDTO)
 					.collect(Collectors.toList());
-			
+
 			log.info(pageProductosMateriales.stream().map(ProductoMaterialDTO::getProductoMaterialId).collect(Collectors.toList()) + ": productoMaterialId");
 			Set<Long> materialIds = pageProductosMateriales.stream().map(m -> m.getMaterial().getMaterialId()).collect(Collectors.toSet());
 			Set<Long> tipoUnidadIds = pageProductosMateriales.stream().map(m -> m.getTipoUnidad().getTipoUnidadId()).collect(Collectors.toSet());
-			
+
 			Map<Long, TipoUnidadDTO> tipoUnidadMap = tipoUnidadRepository.findByTipoUnidadIdIn(tipoUnidadIds)
 					.stream()
 					.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
 					.collect(Collectors.toMap(TipoUnidadDTO::getTipoUnidadId, t -> t));
-			
+
 			Map<Long, MaterialDTO> materialMap = materialRepository.findByMaterialIdIn(materialIds)
 					.stream()
 					.map(ProductoMapper.INSTANCE::materialToMaterialDTO)
 					.collect(Collectors.toMap(MaterialDTO::getMaterialId, m -> m));
-			
+
 			pageProductosMateriales.forEach(p -> {
 				p.setMaterial(materialMap.get(p.getMaterial().getMaterialId()));
 				p.getMaterial().setTipoMaterial(null);
 				p.getMaterial().setTipoUnidad(null);
 				p.setTipoUnidad(tipoUnidadMap.get(p.getTipoUnidad().getTipoUnidadId()));
 			});
-			
+
 			Double total = 0d;
 			for(ProductoMaterialDTO pmDTO:pageProductosMateriales) {
-				
+
 				Double referenciaEnGramos = pmDTO.getTipoUnidad().getReferenciaEnGramos();
 				Double cantidadCompra = pmDTO.getMaterial().getCantidadCompra();
 				Double costo = pmDTO.getMaterial().getCosto();
-				
+
 				Double cantidadTotal = cantidadCompra/referenciaEnGramos;
 				total += cantidadTotal*costo;
 			}
 			productoDTO.setCosto(total);
 		}
-		
-		
-		return new ResponseEntity<>(pageProductos, HttpStatus.OK);
+		return pageProductos;
 	}
 	
 	//DONE
@@ -144,9 +169,7 @@ public class ProductoController {
 				return responseEntity;
 			}
 		}
-		
-		
-		
+
 		ProductoDTO savedProducto = ProductoMapper.INSTANCE.productoToProductoDTO(productoRepository.save(new Producto(new Empresa(usuarioDTO.getEmpresaId()), nombre.trim() ))) ;
 		if (file != null) {
 			String fileName = uploadService.uploadProductoImage(file, savedProducto.getProductoId());
