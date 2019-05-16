@@ -11,8 +11,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
+import com.empresa.consumo.masivo.gestion.exception.BusinessServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,12 +158,15 @@ public class ProductoController {
 	//DONE
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, readOnly = false, rollbackFor = {
 			Exception.class })
-	@RequestMapping(value="add", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<?> addProducto(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @NotEmpty @RequestParam(value = "nombre") String nombre,
-			@RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+	@RequestMapping(value = "add", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<?> addProducto(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @RequestParam(value = "nombre") String nombre,
+			@RequestParam(value = "file", required = false) MultipartFile file) throws IOException, BusinessServiceException {
 		
 		if (usuarioDTO.getEmpresaId() == null) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		if (nombre == null || nombre.isEmpty()){
+			throw new BusinessServiceException();
 		}
 		
 		if (file != null) {
