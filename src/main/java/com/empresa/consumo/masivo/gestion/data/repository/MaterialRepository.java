@@ -13,6 +13,7 @@ import com.empresa.consumo.masivo.gestion.data.entity.ProductoMaterial;
 public interface MaterialRepository extends CrudRepository<Material, Long> {
 
 	Page<Material> findByEmpresa_EmpresaIdAndActivo(Long empresaId, Boolean activo,Pageable pageable);
+	Page<Material> findByEmpresa_EmpresaIdAndActivoAndNombreContainingIgnoreCase(Long empresaId, Boolean activo, String search,Pageable pageable);
 	Boolean existsByMaterialIdAndEmpresa_EmpresaId(Long materialId, Long empresaId);
 	List<Material> findByMaterialIdIn(Collection<Long> materialIds);
 }

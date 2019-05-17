@@ -66,13 +66,21 @@ public class MaterialController {
 	
 	//DONE
 	@RequestMapping(value="all", method = RequestMethod.GET)
-	public ResponseEntity<Page<MaterialDTO>> getAllMateriales(@AuthenticationPrincipal UsuarioDTO usuarioDTO,Pageable pageable) {
+	public ResponseEntity<Page<MaterialDTO>> getAllMateriales(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @RequestParam(value = "search", required = false) String search,Pageable pageable) {
 		
 		if (usuarioDTO.getEmpresaId() == null) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
-		Page<MaterialDTO> pageMateriales = materialRepository.findByEmpresa_EmpresaIdAndActivo(usuarioDTO.getEmpresaId(), true, pageable)
-				.map(material -> ProductoMapper.INSTANCE.materialToMaterialDTO(material));
+		Page<MaterialDTO> pageMateriales = null;
+		if (search != null && !search.isEmpty()){
+			pageMateriales = materialRepository.findByEmpresa_EmpresaIdAndActivoAndNombreContainingIgnoreCase(usuarioDTO.getEmpresaId(), true, search, pageable)
+					.map(ProductoMapper.INSTANCE::materialToMaterialDTO);
+
+		}else{
+			pageMateriales = materialRepository.findByEmpresa_EmpresaIdAndActivo(usuarioDTO.getEmpresaId(), true, pageable)
+					.map(ProductoMapper.INSTANCE::materialToMaterialDTO);
+		}
+
 		
 		Set<Long> tipoMaterialIds = pageMateriales.get().map(m -> m.getTipoMaterial().getTipoMaterialId()).collect(Collectors.toSet());
 		Set<Long> tipoUnidadIds = pageMateriales.get().map(m -> m.getTipoUnidad().getTipoUnidadId()).collect(Collectors.toSet());
