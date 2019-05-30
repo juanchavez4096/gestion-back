@@ -8,8 +8,8 @@ import com.empresa.consumo.masivo.gestion.data.entity.Producto;
 
 public interface ProductoRepository extends CrudRepository<Producto, Long> {
 
-	Page<Producto> findByEmpresa_EmpresaIdAndActivo(Long empresaId, Boolean activo,Pageable pageable);
-	Page<Producto> findByEmpresa_EmpresaIdAndActivoAndNombreContainingIgnoreCase(Long empresaId, Boolean activo, String search,Pageable pageable);
+	Page<Producto> findByEmpresa_EmpresaIdAndActivoOrderByNombre(Long empresaId, Boolean activo,Pageable pageable);
+	Page<Producto> findByEmpresa_EmpresaIdAndActivoAndNombreContainingIgnoreCaseOrderByNombre(Long empresaId, Boolean activo, String search,Pageable pageable);
 
 	Page<Producto> findByProductoIdAndEmpresa_EmpresaIdAndActivo(Long productoId, Long empresaId, Boolean activo,Pageable pageable);
 	Boolean existsByProductoIdAndEmpresa_EmpresaId(Long productoId, Long empresaId);

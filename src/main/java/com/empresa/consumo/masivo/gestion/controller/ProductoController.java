@@ -78,20 +78,15 @@ public class ProductoController {
 	
 	//TODO precios
 	@RequestMapping(value="all", method = RequestMethod.GET)
-	public ResponseEntity<Page<ProductoDTO>> getAllProducts(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @RequestParam(value = "search", required = false) String search,Pageable pageable) {
+	public ResponseEntity<Page<ProductoDTO>> getAllProducts(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @RequestParam(value = "search", required = false, defaultValue = "") String search,Pageable pageable) {
 		
 		if (usuarioDTO.getEmpresaId() == null) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 
-		Page<ProductoDTO> pageProductos = null;
-		if (search != null && !search.isEmpty()){
-			pageProductos = productoRepository.findByEmpresa_EmpresaIdAndActivoAndNombreContainingIgnoreCase(usuarioDTO.getEmpresaId(), true, "%"+search+"%", pageable)
+		Page<ProductoDTO> pageProductos = productoRepository.findByEmpresa_EmpresaIdAndActivoAndNombreContainingIgnoreCaseOrderByNombre(usuarioDTO.getEmpresaId(), true, "%"+search+"%", pageable)
 					.map(ProductoMapper.INSTANCE::productoToProductoDTO);
-		}else{
-			pageProductos = productoRepository.findByEmpresa_EmpresaIdAndActivo(usuarioDTO.getEmpresaId(), true, pageable)
-					.map(ProductoMapper.INSTANCE::productoToProductoDTO);
-		}
+
 
 		Page<ProductoDTO> newPageProductos = doLogic(pageProductos, usuarioDTO);
 		

@@ -53,13 +53,18 @@ public class ProductoMaterialController {
 	
 	//DONE
 	@RequestMapping(value="all", method = RequestMethod.GET)
-	public ResponseEntity<Page<ProductoMaterialDTO>> getAllMaterialesDeProductos(@Min(value = 1) @RequestParam(value = "productoId") Long productoId, @AuthenticationPrincipal UsuarioDTO usuarioDTO,Pageable pageable) {
+	public ResponseEntity<Page<ProductoMaterialDTO>> getAllMaterialesDeProductos(@Min(value = 1) @RequestParam(value = "productoId") Long productoId, @RequestParam(value = "search", required = false, defaultValue = "") String search, @AuthenticationPrincipal UsuarioDTO usuarioDTO,Pageable pageable) {
 		
 		if (usuarioDTO.getEmpresaId() == null) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
-		Page<ProductoMaterialDTO> pageProductosMateriales = productoMaterialRepository.findByProducto_Empresa_EmpresaIdAndProducto_ProductoId(usuarioDTO.getEmpresaId(), productoId,pageable)
-				.map(productoMaterial -> ProductoMapper.INSTANCE.productoMaterialToProductoMaterialDTO(productoMaterial));
+		Page<ProductoMaterialDTO> pageProductosMateriales = null;
+
+		pageProductosMateriales = productoMaterialRepository.findByProducto_Empresa_EmpresaIdAndProducto_ProductoIdAndMaterial_NombreContainingIgnoreCaseOrderByMaterial_Nombre(usuarioDTO.getEmpresaId(), productoId, "%"+search +"%",pageable)
+					.map(ProductoMapper.INSTANCE::productoMaterialToProductoMaterialDTO);
+
+
+
 		
 		Set<Long> materialIds = pageProductosMateriales.get().map(m -> m.getMaterial().getMaterialId()).collect(Collectors.toSet());
 		Set<Long> tipoUnidadIds = pageProductosMateriales.get().map(m -> m.getTipoUnidad().getTipoUnidadId()).collect(Collectors.toSet());

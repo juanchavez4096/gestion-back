@@ -87,12 +87,12 @@ public class MaterialController {
 		
 		Map<Long, TipoMaterialDTO> tipoMaterialMap = tipoMaterialRepository.findByTipoMaterialIdIn(tipoMaterialIds)
 														.stream()
-														.map(t -> ProductoMapper.INSTANCE.tipoMaterialToTipoMaterialDTO(t))
+														.map(ProductoMapper.INSTANCE::tipoMaterialToTipoMaterialDTO)
 														.collect(Collectors.toMap(TipoMaterialDTO::getTipoMaterialId, t -> t));
 		
 		Map<Long, TipoUnidadDTO> tipoUnidadMap = tipoUnidadRepository.findByTipoUnidadIdIn(tipoUnidadIds)
 				.stream()
-				.map(t -> ProductoMapper.INSTANCE.tipoUnidadToTipoUnidadDTO(t))
+				.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
 				.collect(Collectors.toMap(TipoUnidadDTO::getTipoUnidadId, t -> t));
 		
 		pageMateriales.forEach(p -> {
