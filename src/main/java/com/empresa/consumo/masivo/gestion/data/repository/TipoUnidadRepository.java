@@ -10,4 +10,5 @@ import com.empresa.consumo.masivo.gestion.data.entity.TipoUnidad;
 public interface TipoUnidadRepository extends CrudRepository<TipoUnidad, Long> {
 	
 	List<TipoUnidad> findByTipoUnidadIdIn(Collection<Long> tipoUnidadIds);
+	List<TipoUnidad> findByOrderByTipo();
 }

@@ -1,6 +1,7 @@
 package com.empresa.consumo.masivo.gestion.controller;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -20,6 +21,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -102,11 +106,45 @@ public class MaterialController {
 		
 		return new ResponseEntity<>(pageMateriales, HttpStatus.OK);
 	}
+
+	@RequestMapping(value="allWithOutPage", method = RequestMethod.GET)
+	public ResponseEntity<List<MaterialDTO>> getAllMaterialesWithOutPages(@AuthenticationPrincipal UsuarioDTO usuarioDTO) {
+
+		if (usuarioDTO.getEmpresaId() == null) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+
+		List<MaterialDTO> listMateriales = materialRepository.findByEmpresa_EmpresaIdAndActivo(usuarioDTO.getEmpresaId(), true)
+				.stream()
+				.map(ProductoMapper.INSTANCE::materialToMaterialDTO)
+				.collect(Collectors.toList());
+
+		return new ResponseEntity<>(listMateriales, HttpStatus.OK);
+	}
+
+	@RequestMapping(value="allTipoUnidad", method = RequestMethod.GET)
+	public ResponseEntity<List<TipoUnidadDTO>> getAllTipoUnidad(@AuthenticationPrincipal UsuarioDTO usuarioDTO) {
+
+		if (usuarioDTO.getEmpresaId() == null) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		List<TipoUnidadDTO> listTipoUnidad = tipoUnidadRepository.findByOrderByTipo()
+				.stream()
+				.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
+				.collect(Collectors.toList());
+
+		return new ResponseEntity<>(listTipoUnidad, HttpStatus.OK);
+	}
 	
 	//DONE
-	@RequestMapping(value="add", method = RequestMethod.POST)
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, readOnly = false, rollbackFor = {
+			Exception.class })
+	@RequestMapping(value="add", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> addMaterial(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @Valid @RequestBody MaterialDTO materialDTO) {
-		
+
+		/*@RequestParam(value = "nombre") String nombre,
+		@RequestParam(value = "imagen", required = false) MultipartFile file*/
+
 		if (usuarioDTO.getEmpresaId() == null) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
@@ -125,6 +163,8 @@ public class MaterialController {
 	}
 	
 	//DONE
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, readOnly = false, rollbackFor = {
+			Exception.class })
 	@RequestMapping(value="update", method = RequestMethod.PUT)
 	public ResponseEntity<?> updateMaterial(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @Valid @RequestBody MaterialDTO materialDTO) {
 		
@@ -154,6 +194,8 @@ public class MaterialController {
 	}
 	
 	//DONE
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, readOnly = false, rollbackFor = {
+			Exception.class })
 	@RequestMapping(value="delete", method = RequestMethod.DELETE)
 	public ResponseEntity<?> deleteMaterial(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @Min(value = 1) @RequestParam(value = "materialId") Long materialId) {
 		
@@ -170,6 +212,8 @@ public class MaterialController {
 		}
 		
 	}
+
+
 	
 	@RequestMapping(path = "file/upload", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file,

@@ -62,12 +62,12 @@ public class UsuarioController {
 		UsuarioDTO usuarioDTO = UsuarioMapper.INSTANCE
 									.usuarioToUsuarioDTO(usuario);
 		if (usuarioDTO == null) {
-			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 		}else {
 			if (encryptService.check(loginDTO.getPassword(), usuarioDTO.getPassword())) {
 				return new ResponseEntity<>(new UserWithToken(usuarioDTO, jwtService.toToken(usuarioDTO)), HttpStatus.OK);
 			}else {
-				return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+				return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 			}
 			
 		}

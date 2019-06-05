@@ -9,6 +9,6 @@ import com.empresa.consumo.masivo.gestion.data.entity.Empresa;
 public interface EmpresaRepository extends CrudRepository<Empresa, Long> {
 
 	Page<Empresa> findBy(Pageable pageable);
-	Long existsByProductos_ProductoId(Long productoId);
+	Long existsByProductos_ProductoIdAndEnabled(Long productoId, Boolean enabled);
 
 }

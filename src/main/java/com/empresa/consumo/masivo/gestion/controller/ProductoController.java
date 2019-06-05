@@ -116,7 +116,7 @@ public class ProductoController {
 
 	private Page<ProductoDTO> doLogic(Page<ProductoDTO> pageProductos, UsuarioDTO usuarioDTO){
 		for (ProductoDTO productoDTO: pageProductos.getContent()) {
-			List<ProductoMaterialDTO> pageProductosMateriales = productoMaterialRepository.findByProducto_Empresa_EmpresaIdAndProducto_ProductoId(usuarioDTO.getEmpresaId(), productoDTO.getProductoId())
+			List<ProductoMaterialDTO> pageProductosMateriales = productoMaterialRepository.findByProducto_Empresa_EmpresaIdAndProducto_ProductoIdAndProducto_ActivoAndMaterial_Activo(usuarioDTO.getEmpresaId(), productoDTO.getProductoId(), Boolean.TRUE, Boolean.TRUE)
 					.stream()
 					.map(ProductoMapper.INSTANCE::productoMaterialToProductoMaterialDTO)
 					.collect(Collectors.toList());
@@ -188,6 +188,8 @@ public class ProductoController {
 	}
 	
 	//DONE
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, readOnly = false, rollbackFor = {
+			Exception.class })
 	@RequestMapping(value="update", method = RequestMethod.PUT)
 	public ResponseEntity<?> updateProducto(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @Valid @RequestBody ProductoDTO productoDTO) {
 		

@@ -14,6 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -60,7 +63,7 @@ public class ProductoMaterialController {
 		}
 		Page<ProductoMaterialDTO> pageProductosMateriales = null;
 
-		pageProductosMateriales = productoMaterialRepository.findByProducto_Empresa_EmpresaIdAndProducto_ProductoIdAndMaterial_NombreContainingIgnoreCaseOrderByMaterial_Nombre(usuarioDTO.getEmpresaId(), productoId, "%"+search +"%",pageable)
+		pageProductosMateriales = productoMaterialRepository.findByProducto_Empresa_EmpresaIdAndProducto_ProductoIdAndProducto_ActivoAndMaterial_ActivoAndMaterial_NombreContainingIgnoreCaseOrderByMaterial_Nombre(usuarioDTO.getEmpresaId(), productoId, Boolean.TRUE, Boolean.TRUE, "%"+search +"%",pageable)
 					.map(ProductoMapper.INSTANCE::productoMaterialToProductoMaterialDTO);
 
 
@@ -71,12 +74,12 @@ public class ProductoMaterialController {
 		
 		Map<Long, TipoUnidadDTO> tipoUnidadMap = tipoUnidadRepository.findByTipoUnidadIdIn(tipoUnidadIds)
 				.stream()
-				.map(t -> ProductoMapper.INSTANCE.tipoUnidadToTipoUnidadDTO(t))
+				.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
 				.collect(Collectors.toMap(TipoUnidadDTO::getTipoUnidadId, t -> t));
 		
 		Map<Long, MaterialDTO> materialMap = materialRepository.findByMaterialIdIn(materialIds)
 				.stream()
-				.map(m -> ProductoMapper.INSTANCE.materialToMaterialDTO(m))
+				.map(ProductoMapper.INSTANCE::materialToMaterialDTO)
 				.collect(Collectors.toMap(MaterialDTO::getMaterialId, m -> m));
 		
 		pageProductosMateriales.forEach(p -> {
@@ -90,6 +93,8 @@ public class ProductoMaterialController {
 	}
 	
 	//DONE
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, readOnly = false, rollbackFor = {
+			Exception.class })
 	@RequestMapping(value="add", method = RequestMethod.POST)
 	public ResponseEntity<?> addProductoMaterial(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @Valid @RequestBody AddProductoMaterialDTO addProductoMaterialDTO) {
 		
@@ -111,6 +116,8 @@ public class ProductoMaterialController {
 	}
 	
 	//DONE
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, readOnly = false, rollbackFor = {
+			Exception.class })
 	@RequestMapping(value="update", method = RequestMethod.PUT)
 	public ResponseEntity<?> updateProductoMaterial(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @Valid @RequestBody ModifyProductoMaterialDTO modifyProductoMaterialDTO) {
 		
@@ -138,6 +145,8 @@ public class ProductoMaterialController {
 	}
 	
 	//DONE
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, readOnly = false, rollbackFor = {
+			Exception.class })
 	@RequestMapping(value="delete", method = RequestMethod.DELETE)
 	public ResponseEntity<?> deleteProductoMaterial(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @Min(value = 1) @RequestParam(value = "productoMaterialId") Long productoMaterialId) {
 		

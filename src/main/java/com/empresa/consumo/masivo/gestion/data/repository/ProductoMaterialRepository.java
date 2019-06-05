@@ -12,6 +12,6 @@ import com.empresa.consumo.masivo.gestion.data.entity.ProductoMaterial;
 
 public interface ProductoMaterialRepository extends CrudRepository<ProductoMaterial, Long> {
 
-	Page<ProductoMaterial> findByProducto_Empresa_EmpresaIdAndProducto_ProductoIdAndMaterial_NombreContainingIgnoreCaseOrderByMaterial_Nombre(Long empresaId, Long productoId, String search,Pageable pageable);
-	List<ProductoMaterial> findByProducto_Empresa_EmpresaIdAndProducto_ProductoId(Long empresaId, Long productoId);
+	Page<ProductoMaterial> findByProducto_Empresa_EmpresaIdAndProducto_ProductoIdAndProducto_ActivoAndMaterial_ActivoAndMaterial_NombreContainingIgnoreCaseOrderByMaterial_Nombre(Long empresaId, Long productoId, Boolean productoActivo, Boolean materialActivo, String search,Pageable pageable);
+	List<ProductoMaterial> findByProducto_Empresa_EmpresaIdAndProducto_ProductoIdAndProducto_ActivoAndMaterial_Activo(Long empresaId, Long productoId, Boolean productoActivo, Boolean materialActivo);
 }
