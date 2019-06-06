@@ -110,8 +110,6 @@ public class ProductoController {
 		}else{
 			return new ResponseEntity<>(newPageProductos.getContent().get(0), HttpStatus.OK);
 		}
-
-
 	}
 
 	private Page<ProductoDTO> doLogic(Page<ProductoDTO> pageProductos, UsuarioDTO usuarioDTO){
@@ -125,32 +123,39 @@ public class ProductoController {
 			Set<Long> materialIds = pageProductosMateriales.stream().map(m -> m.getMaterial().getMaterialId()).collect(Collectors.toSet());
 			Set<Long> tipoUnidadIds = pageProductosMateriales.stream().map(m -> m.getTipoUnidad().getTipoUnidadId()).collect(Collectors.toSet());
 
-			Map<Long, TipoUnidadDTO> tipoUnidadMap = tipoUnidadRepository.findByTipoUnidadIdIn(tipoUnidadIds)
-					.stream()
-					.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
-					.collect(Collectors.toMap(TipoUnidadDTO::getTipoUnidadId, t -> t));
-
 			Map<Long, MaterialDTO> materialMap = materialRepository.findByMaterialIdIn(materialIds)
 					.stream()
 					.map(ProductoMapper.INSTANCE::materialToMaterialDTO)
 					.collect(Collectors.toMap(MaterialDTO::getMaterialId, m -> m));
 
+			tipoUnidadIds.addAll(materialMap.values().stream().map(m -> m.getTipoUnidad().getTipoUnidadId()).collect(Collectors.toList()));
+
+			Map<Long, TipoUnidadDTO> tipoUnidadMap = tipoUnidadRepository.findByTipoUnidadIdIn(tipoUnidadIds)
+					.stream()
+					.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
+					.collect(Collectors.toMap(TipoUnidadDTO::getTipoUnidadId, t -> t));
+
+			materialMap.forEach( (k,v) -> {
+				v.setTipoUnidad(tipoUnidadMap.get(v.getTipoUnidad().getTipoUnidadId()));
+			} );
+
 			pageProductosMateriales.forEach(p -> {
 				p.setMaterial(materialMap.get(p.getMaterial().getMaterialId()));
-				p.getMaterial().setTipoMaterial(null);
-				p.getMaterial().setTipoUnidad(null);
 				p.setTipoUnidad(tipoUnidadMap.get(p.getTipoUnidad().getTipoUnidadId()));
 			});
 
-			Double total = 0d;
+			Double total = 0D;
 			for(ProductoMaterialDTO pmDTO:pageProductosMateriales) {
 
-				Double referenciaEnGramos = pmDTO.getTipoUnidad().getReferenciaEnGramos();
-				Double cantidadCompra = pmDTO.getMaterial().getCantidadCompra();
-				Double costo = pmDTO.getMaterial().getCosto();
+				Double costoCompra = pmDTO.getMaterial().getCosto();
+				//CONVIERTE LA CANTIDAD COMPRADA DE CUALQUIER UNIDAD A GRAMOS
+				Double cantidadCompra = pmDTO.getMaterial().getCantidadCompra() * pmDTO.getMaterial().getTipoUnidad().getReferenciaEnGramos();
+				Double cantidadUsada = pmDTO.getCantidad() * pmDTO.getTipoUnidad().getReferenciaEnGramos();
 
-				Double cantidadTotal = cantidadCompra/referenciaEnGramos;
-				total += cantidadTotal*costo;
+				total += (costoCompra*cantidadUsada)/cantidadCompra;
+
+
+				System.out.println(pmDTO.getMaterial().getNombre() + ": material nombre, "+(costoCompra*cantidadUsada)/cantidadCompra+": precio, "+total+": total");
 			}
 			productoDTO.setCosto(total);
 		}

@@ -34,6 +34,8 @@ public class TipoUnidad implements java.io.Serializable {
 	private String unidad;
 	@Column(name = "referencia_en_gramos", nullable = false)
 	private Double referenciaEnGramos;
+	@Column(name = "agrupacion", nullable = false)
+	private Long agrupacion;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "tipoUnidad")
 	private Set<Material> materials = new HashSet<>(0);
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "tipoUnidad")
@@ -42,11 +44,12 @@ public class TipoUnidad implements java.io.Serializable {
 	public TipoUnidad() {
 	}
 
-	public TipoUnidad(Long tipoUnidadId, String tipo, String unidad, double referenciaEnGramos) {
+	public TipoUnidad(Long tipoUnidadId, String tipo, String unidad, double referenciaEnGramos, Long agrupacion) {
 		this.tipoUnidadId = tipoUnidadId;
 		this.tipo = tipo;
 		this.unidad = unidad;
 		this.referenciaEnGramos = referenciaEnGramos;
+		this.agrupacion = agrupacion;
 	}
 
 	public TipoUnidad(Long tipoUnidadId, String tipo, String unidad, double referenciaEnGramos, Set materials,

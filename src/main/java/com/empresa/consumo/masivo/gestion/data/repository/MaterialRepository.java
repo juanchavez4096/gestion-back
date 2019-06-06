@@ -15,6 +15,7 @@ public interface MaterialRepository extends CrudRepository<Material, Long> {
 	Page<Material> findByEmpresa_EmpresaIdAndActivo(Long empresaId, Boolean activo,Pageable pageable);
 	List<Material> findByEmpresa_EmpresaIdAndActivo(Long empresaId, Boolean activo);
 	Page<Material> findByEmpresa_EmpresaIdAndActivoAndNombreContainingIgnoreCase(Long empresaId, Boolean activo, String search,Pageable pageable);
+	Page<Material> findByMaterialIdAndEmpresa_EmpresaIdAndActivo(Long materialId,Long empresaId, Boolean activo, Pageable pageable);
 	Boolean existsByMaterialIdAndEmpresa_EmpresaId(Long materialId, Long empresaId);
 	List<Material> findByMaterialIdIn(Collection<Long> materialIds);
 }

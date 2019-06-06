@@ -11,4 +11,5 @@ public interface TipoUnidadRepository extends CrudRepository<TipoUnidad, Long> {
 	
 	List<TipoUnidad> findByTipoUnidadIdIn(Collection<Long> tipoUnidadIds);
 	List<TipoUnidad> findByOrderByTipo();
+	List<TipoUnidad> findByAgrupacionOrderByTipo(Long agrupacion);
 }

@@ -37,9 +37,6 @@ public class Material implements java.io.Serializable {
     @JoinColumn(name = "empresa_id", nullable = false)
 	private Empresa empresa;
 	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tipo_material_id", nullable = false)
-	private TipoMaterial tipoMaterial;
-	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_unidad_id", nullable = false)
 	private TipoUnidad tipoUnidad;
 	@Column(name = "nombre", nullable = false)
@@ -65,11 +62,10 @@ public class Material implements java.io.Serializable {
 
 
 
-	public Material(Empresa empresa, TipoMaterial tipoMaterial, TipoUnidad tipoUnidad, String nombre, Double costo,
+	public Material(Empresa empresa, TipoUnidad tipoUnidad, String nombre, Double costo,
 			double cantidadCompra, Set<ProductoMaterial> productoMaterials) {
 		super();
 		this.empresa = empresa;
-		this.tipoMaterial = tipoMaterial;
 		this.tipoUnidad = tipoUnidad;
 		this.nombre = nombre;
 		this.costo = costo;
@@ -79,22 +75,20 @@ public class Material implements java.io.Serializable {
 
 
 
-	public Material(Long materialId, Empresa empresa, TipoMaterial tipoMaterial, TipoUnidad tipoUnidad, String nombre,
+	public Material(Long materialId, Empresa empresa, TipoUnidad tipoUnidad, String nombre,
 			Double costo, Double cantidadCompra) {
 		this.materialId = materialId;
 		this.empresa = empresa;
-		this.tipoMaterial = tipoMaterial;
 		this.tipoUnidad = tipoUnidad;
 		this.nombre = nombre;
 		this.costo = costo;
 		this.cantidadCompra = cantidadCompra;
 	}
 
-	public Material(Long materialId, Empresa empresa, TipoMaterial tipoMaterial, TipoUnidad tipoUnidad, String nombre,
+	public Material(Long materialId, Empresa empresa, TipoUnidad tipoUnidad, String nombre,
 			Double costo, Double cantidadCompra, Set productoMaterials) {
 		this.materialId = materialId;
 		this.empresa = empresa;
-		this.tipoMaterial = tipoMaterial;
 		this.tipoUnidad = tipoUnidad;
 		this.nombre = nombre;
 		this.costo = costo;

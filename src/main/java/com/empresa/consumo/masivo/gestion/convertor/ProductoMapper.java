@@ -1,20 +1,17 @@
 package com.empresa.consumo.masivo.gestion.convertor;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.factory.Mappers;
-
 import com.empresa.consumo.masivo.gestion.DTO.MaterialDTO;
 import com.empresa.consumo.masivo.gestion.DTO.ProductoDTO;
 import com.empresa.consumo.masivo.gestion.DTO.ProductoMaterialDTO;
-import com.empresa.consumo.masivo.gestion.DTO.TipoMaterialDTO;
 import com.empresa.consumo.masivo.gestion.DTO.TipoUnidadDTO;
 import com.empresa.consumo.masivo.gestion.data.entity.Material;
 import com.empresa.consumo.masivo.gestion.data.entity.Producto;
 import com.empresa.consumo.masivo.gestion.data.entity.ProductoMaterial;
-import com.empresa.consumo.masivo.gestion.data.entity.TipoMaterial;
 import com.empresa.consumo.masivo.gestion.data.entity.TipoUnidad;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
+import org.mapstruct.factory.Mappers;
 
 @Mapper
 public interface ProductoMapper {
@@ -32,13 +29,10 @@ public interface ProductoMapper {
 	ProductoMaterialDTO productoMaterialToProductoMaterialDTO(ProductoMaterial productoMaterial);
 	
 	@Mappings({
-		@Mapping(target = "tipoMaterial", expression = "java( new TipoMaterialDTO( material.getTipoMaterial().getTipoMaterialId() ) )"),
 		@Mapping(target = "tipoUnidad", expression = "java( new TipoUnidadDTO( material.getTipoUnidad().getTipoUnidadId() ) )")
 	   }) 
 	MaterialDTO materialToMaterialDTO(Material material);
 	TipoUnidadDTO tipoUnidadToTipoUnidadDTO(TipoUnidad tipoUnidad);
-	
-	TipoMaterialDTO tipoMaterialToTipoMaterialDTO(TipoMaterial tipoMaterial);
 	
 	//To Entity
 
@@ -56,10 +50,4 @@ public interface ProductoMapper {
 		@Mapping(target = "productoMaterials", ignore = true)
 	   }) 
 	TipoUnidad tipoUnidadDTOToTipoUnidad(TipoUnidadDTO tipoUnidadDTO);
-
-	@Mappings({
-			@Mapping(target = "empresa", ignore = true),
-			@Mapping(target = "materials", ignore = true)
-	})
-	TipoMaterial tipoMaterialDTOToTipoMaterial(TipoMaterialDTO tipoMaterialDTO);
 }

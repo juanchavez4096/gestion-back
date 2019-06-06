@@ -14,8 +14,6 @@ public class MaterialDTO implements java.io.Serializable {
 
 	private Long materialId;
 	@NotNull
-	private TipoMaterialDTO tipoMaterial;
-	@NotNull
 	private TipoUnidadDTO tipoUnidad;
 	@NotNull
 	@NotEmpty

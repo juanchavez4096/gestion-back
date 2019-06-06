@@ -1,17 +1,23 @@
 package com.empresa.consumo.masivo.gestion.controller;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-
+import com.empresa.consumo.masivo.gestion.DTO.MaterialDTO;
+import com.empresa.consumo.masivo.gestion.DTO.TipoUnidadDTO;
+import com.empresa.consumo.masivo.gestion.DTO.UsuarioDTO;
+import com.empresa.consumo.masivo.gestion.convertor.ProductoMapper;
+import com.empresa.consumo.masivo.gestion.data.entity.Empresa;
+import com.empresa.consumo.masivo.gestion.data.entity.Material;
+import com.empresa.consumo.masivo.gestion.data.entity.Usuario;
+import com.empresa.consumo.masivo.gestion.data.repository.MaterialRepository;
+import com.empresa.consumo.masivo.gestion.data.repository.TipoUnidadRepository;
+import com.empresa.consumo.masivo.gestion.data.repository.UsuarioRepository;
+import com.empresa.consumo.masivo.gestion.exception.ImageNotFoundException;
+import com.empresa.consumo.masivo.gestion.exception.InvalidFileException;
+import com.empresa.consumo.masivo.gestion.exception.InvalidMaterialException;
+import com.empresa.consumo.masivo.gestion.security.JwtService;
+import com.empresa.consumo.masivo.gestion.service.UploadService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,29 +31,16 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.empresa.consumo.masivo.gestion.DTO.MaterialDTO;
-import com.empresa.consumo.masivo.gestion.DTO.TipoMaterialDTO;
-import com.empresa.consumo.masivo.gestion.DTO.TipoUnidadDTO;
-import com.empresa.consumo.masivo.gestion.DTO.UsuarioDTO;
-import com.empresa.consumo.masivo.gestion.convertor.ProductoMapper;
-import com.empresa.consumo.masivo.gestion.data.entity.Empresa;
-import com.empresa.consumo.masivo.gestion.data.entity.Material;
-import com.empresa.consumo.masivo.gestion.data.entity.Usuario;
-import com.empresa.consumo.masivo.gestion.data.repository.MaterialRepository;
-import com.empresa.consumo.masivo.gestion.data.repository.TipoMaterialRepository;
-import com.empresa.consumo.masivo.gestion.data.repository.TipoUnidadRepository;
-import com.empresa.consumo.masivo.gestion.data.repository.UsuarioRepository;
-import com.empresa.consumo.masivo.gestion.exception.ImageNotFoundException;
-import com.empresa.consumo.masivo.gestion.exception.InvalidFileException;
-import com.empresa.consumo.masivo.gestion.security.JwtService;
-import com.empresa.consumo.masivo.gestion.service.UploadService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/materiales")
@@ -57,8 +50,6 @@ public class MaterialController {
 	
 	@Autowired
 	private MaterialRepository materialRepository;
-	@Autowired
-	private TipoMaterialRepository tipoMaterialRepository;
 	@Autowired
 	private TipoUnidadRepository tipoUnidadRepository;
 	@Autowired
@@ -85,26 +76,42 @@ public class MaterialController {
 					.map(ProductoMapper.INSTANCE::materialToMaterialDTO);
 		}
 
+		Page<MaterialDTO> newPageMaterials = doLogic(pageMateriales, usuarioDTO);
 		
-		Set<Long> tipoMaterialIds = pageMateriales.get().map(m -> m.getTipoMaterial().getTipoMaterialId()).collect(Collectors.toSet());
+		return new ResponseEntity<>(newPageMaterials, HttpStatus.OK);
+	}
+
+	@RequestMapping(value="byId", method = RequestMethod.GET)
+	public ResponseEntity<MaterialDTO> getById(@AuthenticationPrincipal UsuarioDTO usuarioDTO,@Min(value = 1) @RequestParam(value = "materialId") Long materialId, Pageable pageable) {
+
+		if (usuarioDTO.getEmpresaId() == null) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		Page<MaterialDTO> pageMaterials = materialRepository.findByMaterialIdAndEmpresa_EmpresaIdAndActivo(materialId, usuarioDTO.getEmpresaId(), true, pageable)
+				.map(ProductoMapper.INSTANCE::materialToMaterialDTO);
+
+		Page<MaterialDTO> newPageMaterials = doLogic(pageMaterials, usuarioDTO);
+
+		if (pageMaterials.isEmpty()){
+			return new ResponseEntity<>(null, HttpStatus.OK);
+		}else{
+			return new ResponseEntity<>(newPageMaterials.getContent().get(0), HttpStatus.OK);
+		}
+	}
+
+	private Page<MaterialDTO> doLogic(Page<MaterialDTO> pageMateriales, UsuarioDTO usuarioDTO){
 		Set<Long> tipoUnidadIds = pageMateriales.get().map(m -> m.getTipoUnidad().getTipoUnidadId()).collect(Collectors.toSet());
-		
-		Map<Long, TipoMaterialDTO> tipoMaterialMap = tipoMaterialRepository.findByTipoMaterialIdIn(tipoMaterialIds)
-														.stream()
-														.map(ProductoMapper.INSTANCE::tipoMaterialToTipoMaterialDTO)
-														.collect(Collectors.toMap(TipoMaterialDTO::getTipoMaterialId, t -> t));
-		
+
 		Map<Long, TipoUnidadDTO> tipoUnidadMap = tipoUnidadRepository.findByTipoUnidadIdIn(tipoUnidadIds)
 				.stream()
 				.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
 				.collect(Collectors.toMap(TipoUnidadDTO::getTipoUnidadId, t -> t));
-		
+
 		pageMateriales.forEach(p -> {
-			p.setTipoMaterial(tipoMaterialMap.get(p.getTipoMaterial().getTipoMaterialId()));
+
 			p.setTipoUnidad(tipoUnidadMap.get(p.getTipoUnidad().getTipoUnidadId()));
 		});
-		
-		return new ResponseEntity<>(pageMateriales, HttpStatus.OK);
+		return pageMateriales;
 	}
 
 	@RequestMapping(value="allWithOutPage", method = RequestMethod.GET)
@@ -123,15 +130,26 @@ public class MaterialController {
 	}
 
 	@RequestMapping(value="allTipoUnidad", method = RequestMethod.GET)
-	public ResponseEntity<List<TipoUnidadDTO>> getAllTipoUnidad(@AuthenticationPrincipal UsuarioDTO usuarioDTO) {
+	public ResponseEntity<List<TipoUnidadDTO>> getAllTipoUnidad(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @RequestParam(value = "tipoUnidadId", required = false) Long tipoUnidadId) {
 
 		if (usuarioDTO.getEmpresaId() == null) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
-		List<TipoUnidadDTO> listTipoUnidad = tipoUnidadRepository.findByOrderByTipo()
-				.stream()
-				.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
-				.collect(Collectors.toList());
+		List<TipoUnidadDTO> listTipoUnidad = new ArrayList<>();
+		if (tipoUnidadId != null){
+			tipoUnidadRepository.findById(tipoUnidadId).ifPresent(tipoUnidad ->
+				listTipoUnidad.addAll(tipoUnidadRepository.findByAgrupacionOrderByTipo(tipoUnidad.getAgrupacion())
+						.stream()
+						.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
+						.collect(Collectors.toList()))
+			);
+		}else{
+			listTipoUnidad.addAll(tipoUnidadRepository.findByOrderByTipo()
+					.stream()
+					.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
+					.collect(Collectors.toList()));
+		}
+
 
 		return new ResponseEntity<>(listTipoUnidad, HttpStatus.OK);
 	}
@@ -140,17 +158,21 @@ public class MaterialController {
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, readOnly = false, rollbackFor = {
 			Exception.class })
 	@RequestMapping(value="add", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<?> addMaterial(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @Valid @RequestBody MaterialDTO materialDTO) {
+	public ResponseEntity<?> addMaterial(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @RequestParam(value = "materialDTO") String materialDTOString,
+										 @RequestParam(value = "imagen", required = false) MultipartFile file) throws InvalidMaterialException, IOException {
 
-		/*@RequestParam(value = "nombre") String nombre,
-		@RequestParam(value = "imagen", required = false) MultipartFile file*/
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+		mapper.registerModule(new JavaTimeModule());
+		MaterialDTO materialDTO = null;
+		try {
+			materialDTO = mapper.readValue(materialDTOString, MaterialDTO.class);
+		} catch (IOException e) {
+			throw new InvalidMaterialException("Invalid material");
+		}
 
 		if (usuarioDTO.getEmpresaId() == null) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-		}
-		
-		if (!tipoMaterialRepository.existsByTipoMaterialIdAndEmpresa_EmpresaId(materialDTO.getTipoMaterial().getTipoMaterialId(), usuarioDTO.getEmpresaId())) {
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
 		
 		Material material = ProductoMapper.INSTANCE.materialDTOToMaterial(materialDTO);
@@ -158,6 +180,9 @@ public class MaterialController {
 		material.setEmpresa(new Empresa(usuarioDTO.getEmpresaId()));
 		material.setActivo(Boolean.TRUE);
 		MaterialDTO savedMaterial = ProductoMapper.INSTANCE.materialToMaterialDTO(materialRepository.save(material)) ;
+		if (file != null) {
+			String fileName = uploadService.uploadMaterialImage(file, savedMaterial.getMaterialId());
+		}
 		
 		return new ResponseEntity<>(savedMaterial, HttpStatus.CREATED);
 	}
@@ -173,10 +198,6 @@ public class MaterialController {
 		}
 		if (materialDTO.getMaterialId() == null || materialDTO.getMaterialId() < 1) {
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-		}
-		
-		if (!tipoMaterialRepository.existsByTipoMaterialIdAndEmpresa_EmpresaId(materialDTO.getTipoMaterial().getTipoMaterialId(), usuarioDTO.getEmpresaId())) {
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
 		
 		Material material = materialRepository.findById(materialDTO.getMaterialId()).get();

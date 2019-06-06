@@ -84,7 +84,6 @@ public class ProductoMaterialController {
 		
 		pageProductosMateriales.forEach(p -> {
 			p.setMaterial(materialMap.get(p.getMaterial().getMaterialId()));
-			p.getMaterial().setTipoMaterial(null);
 			p.getMaterial().setTipoUnidad(null);
 			p.setTipoUnidad(tipoUnidadMap.get(p.getTipoUnidad().getTipoUnidadId()));
 		});
