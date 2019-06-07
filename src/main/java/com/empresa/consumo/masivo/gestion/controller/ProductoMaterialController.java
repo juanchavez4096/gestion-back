@@ -66,29 +66,51 @@ public class ProductoMaterialController {
 		pageProductosMateriales = productoMaterialRepository.findByProducto_Empresa_EmpresaIdAndProducto_ProductoIdAndProducto_ActivoAndMaterial_ActivoAndMaterial_NombreContainingIgnoreCaseOrderByMaterial_Nombre(usuarioDTO.getEmpresaId(), productoId, Boolean.TRUE, Boolean.TRUE, "%"+search +"%",pageable)
 					.map(ProductoMapper.INSTANCE::productoMaterialToProductoMaterialDTO);
 
+		Page<ProductoMaterialDTO> newPageProductosMateriales = doLogic(pageProductosMateriales);
 
+		return new ResponseEntity<>(newPageProductosMateriales, HttpStatus.OK);
+	}
 
-		
+	@RequestMapping(value="byId", method = RequestMethod.GET)
+	public ResponseEntity<ProductoMaterialDTO> getMaterialesDeProductos(@Min(value = 1) @RequestParam(value = "productoMaterialId") Long productoMaterialId, @AuthenticationPrincipal UsuarioDTO usuarioDTO,Pageable pageable) {
+
+		if (usuarioDTO.getEmpresaId() == null) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		Page<ProductoMaterialDTO> pageProductosMateriales = null;
+
+		pageProductosMateriales = productoMaterialRepository.findByProducto_Empresa_EmpresaIdAndProductoMaterialIdAndProducto_ActivoAndMaterial_ActivoOrderByMaterial_Nombre(usuarioDTO.getEmpresaId(), productoMaterialId, Boolean.TRUE, Boolean.TRUE ,pageable)
+				.map(ProductoMapper.INSTANCE::productoMaterialToProductoMaterialDTO);
+
+		Page<ProductoMaterialDTO> newPageProductosMateriales = doLogic(pageProductosMateriales);
+
+		if (newPageProductosMateriales.isEmpty()){
+			return new ResponseEntity<>(null, HttpStatus.OK);
+		}else{
+			return new ResponseEntity<>(newPageProductosMateriales.getContent().get(0), HttpStatus.OK);
+		}
+	}
+
+	private Page<ProductoMaterialDTO> doLogic( Page<ProductoMaterialDTO> pageProductosMateriales ){
 		Set<Long> materialIds = pageProductosMateriales.get().map(m -> m.getMaterial().getMaterialId()).collect(Collectors.toSet());
 		Set<Long> tipoUnidadIds = pageProductosMateriales.get().map(m -> m.getTipoUnidad().getTipoUnidadId()).collect(Collectors.toSet());
-		
+
 		Map<Long, TipoUnidadDTO> tipoUnidadMap = tipoUnidadRepository.findByTipoUnidadIdIn(tipoUnidadIds)
 				.stream()
 				.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
 				.collect(Collectors.toMap(TipoUnidadDTO::getTipoUnidadId, t -> t));
-		
+
 		Map<Long, MaterialDTO> materialMap = materialRepository.findByMaterialIdIn(materialIds)
 				.stream()
 				.map(ProductoMapper.INSTANCE::materialToMaterialDTO)
 				.collect(Collectors.toMap(MaterialDTO::getMaterialId, m -> m));
-		
+
 		pageProductosMateriales.forEach(p -> {
 			p.setMaterial(materialMap.get(p.getMaterial().getMaterialId()));
 			p.getMaterial().setTipoUnidad(null);
 			p.setTipoUnidad(tipoUnidadMap.get(p.getTipoUnidad().getTipoUnidadId()));
 		});
-		
-		return new ResponseEntity<>(pageProductosMateriales, HttpStatus.OK);
+		return pageProductosMateriales;
 	}
 	
 	//DONE
