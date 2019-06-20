@@ -15,4 +15,6 @@ public class EmpresaDTO {
     @NotEmpty
     private String nombre;
     private Boolean enabled;
+    private Boolean iva;
+    private Double porcentajeGanancia;
 }
