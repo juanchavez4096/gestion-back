@@ -79,7 +79,10 @@ public class EmpresaController {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
 		EmpresaDTO empresaDTO = null;
-		empresaRepository.findById(usuarioDTO.getEmpresaId()).ifPresent(EmpresaMapper.INSTANCE::empresaToEmpresaDTO);
+		Optional<Empresa> empresa = empresaRepository.findById(usuarioDTO.getEmpresaId());
+		if (empresa.isPresent()) {
+			empresaDTO = EmpresaMapper.INSTANCE.empresaToEmpresaDTO(empresa.get());
+		}
 		return new ResponseEntity<>( empresaDTO, HttpStatus.OK);
 	}
 
@@ -108,6 +111,30 @@ public class EmpresaController {
 		}
 		empresaRepository.save(new Empresa(usuarioDTO.getEmpresaId(), name, Boolean.TRUE));
 		return new ResponseEntity<>( HttpStatus.OK );
+	}
+
+	@RequestMapping(value="changePreferences", method=RequestMethod.PUT)
+	public ResponseEntity<EmpresaDTO> changeName( @RequestBody EmpresaDTO empresaDTO, @AuthenticationPrincipal UsuarioDTO usuarioDTO) {
+
+		if (usuarioDTO.getEmpresaId() == null) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+
+		empresaRepository.findById(usuarioDTO.getEmpresaId()).ifPresent(empresa -> {
+			if (empresaDTO.getNombre() != null && empresaDTO.getNombre().isEmpty()){
+				empresa.setNombre(empresaDTO.getNombre());
+			}
+			empresa.setActualizarDolarAuto(empresaDTO.getActualizarDolarAuto());
+			empresa.setIva(empresaDTO.getIva());
+			empresa.setValorIva(empresaDTO.getValorIva());
+			empresa.setMostrarPrecioDolar(empresaDTO.getMostrarPrecioDolar());
+			empresa.setPorcentajeGanancia(empresaDTO.getPorcentajeGanancia());
+			empresa.setPrecioDolar(empresaDTO.getPrecioDolar());
+			empresaRepository.save(empresa);
+		});
+
+
+		return new ResponseEntity<>(empresaDTO, HttpStatus.OK );
 	}
 
 	@RequestMapping(value="disable", method=RequestMethod.PUT)

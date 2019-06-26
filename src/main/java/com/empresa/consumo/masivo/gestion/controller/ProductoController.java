@@ -1,10 +1,10 @@
 package com.empresa.consumo.masivo.gestion.controller;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +15,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import com.empresa.consumo.masivo.gestion.data.entity.ProductoHistory;
+import com.empresa.consumo.masivo.gestion.data.repository.*;
 import com.empresa.consumo.masivo.gestion.exception.BusinessServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,11 +47,6 @@ import com.empresa.consumo.masivo.gestion.convertor.ProductoMapper;
 import com.empresa.consumo.masivo.gestion.data.entity.Empresa;
 import com.empresa.consumo.masivo.gestion.data.entity.Producto;
 import com.empresa.consumo.masivo.gestion.data.entity.Usuario;
-import com.empresa.consumo.masivo.gestion.data.repository.MaterialRepository;
-import com.empresa.consumo.masivo.gestion.data.repository.ProductoMaterialRepository;
-import com.empresa.consumo.masivo.gestion.data.repository.ProductoRepository;
-import com.empresa.consumo.masivo.gestion.data.repository.TipoUnidadRepository;
-import com.empresa.consumo.masivo.gestion.data.repository.UsuarioRepository;
 import com.empresa.consumo.masivo.gestion.exception.ImageNotFoundException;
 import com.empresa.consumo.masivo.gestion.exception.InvalidFileException;
 import com.empresa.consumo.masivo.gestion.security.JwtService;
@@ -75,6 +72,10 @@ public class ProductoController {
 	private UsuarioRepository usuarioRepository;
 	@Autowired
 	private UploadService uploadService;
+	@Autowired
+	private EmpresaRepository empresaRepository;
+	@Autowired
+	private ProductoHistoryRepository productoHistoryRepository;
 	
 	//TODO precios
 	@RequestMapping(value="all", method = RequestMethod.GET)
@@ -112,14 +113,28 @@ public class ProductoController {
 		}
 	}
 
-	private Page<ProductoDTO> doLogic(Page<ProductoDTO> pageProductos, UsuarioDTO usuarioDTO){
-		for (ProductoDTO productoDTO: pageProductos.getContent()) {
-			List<ProductoMaterialDTO> pageProductosMateriales = productoMaterialRepository.findByProducto_Empresa_EmpresaIdAndProducto_ProductoIdAndProducto_ActivoAndMaterial_Activo(usuarioDTO.getEmpresaId(), productoDTO.getProductoId(), Boolean.TRUE, Boolean.TRUE)
+
+	public void getAllProductsByMaterialIdWithUpdate(Long materialIdOrProductoId, Long empresaId, Boolean productoId) {
+
+		List<ProductoDTO> productoDTOS = new ArrayList<>();
+		if (productoId){
+			productoDTOS = productoRepository.findByProductoId(materialIdOrProductoId).stream().map
+					(ProductoMapper.INSTANCE::productoToProductoDTO).collect(Collectors.toList());
+		}else {
+			productoDTOS = productoRepository.findByProductoMaterials_Material_MaterialId(materialIdOrProductoId).stream().map
+					(ProductoMapper.INSTANCE::productoToProductoDTO).collect(Collectors.toList());
+		}
+
+
+		for (ProductoDTO productoDTO:productoDTOS){
+			List<ProductoMaterialDTO> pageProductosMateriales = productoMaterialRepository.findByProducto_Empresa_EmpresaIdAndProducto_ProductoIdAndProducto_ActivoAndMaterial_Activo(empresaId, productoDTO.getProductoId(), Boolean.TRUE, Boolean.TRUE)
 					.stream()
 					.map(ProductoMapper.INSTANCE::productoMaterialToProductoMaterialDTO)
 					.collect(Collectors.toList());
 
-			log.info(pageProductosMateriales.stream().map(ProductoMaterialDTO::getProductoMaterialId).collect(Collectors.toList()) + ": productoMaterialId");
+
+
+
 			Set<Long> materialIds = pageProductosMateriales.stream().map(m -> m.getMaterial().getMaterialId()).collect(Collectors.toSet());
 			Set<Long> tipoUnidadIds = pageProductosMateriales.stream().map(m -> m.getTipoUnidad().getTipoUnidadId()).collect(Collectors.toSet());
 
@@ -153,11 +168,99 @@ public class ProductoController {
 				Double cantidadUsada = pmDTO.getCantidad() * pmDTO.getTipoUnidad().getReferenciaEnGramos();
 
 				total += (costoCompra*cantidadUsada)/cantidadCompra;
-
-
-				System.out.println(pmDTO.getMaterial().getNombre() + ": material nombre, "+(costoCompra*cantidadUsada)/cantidadCompra+": precio, "+total+": total");
 			}
-			productoDTO.setCosto(total);
+
+
+
+			Optional<Empresa> optionalEmpresa = empresaRepository.findById(empresaId);
+			Double ganancia = 0d;
+			if (optionalEmpresa.isPresent()){
+				if (optionalEmpresa.get().getIva()){
+					if (optionalEmpresa.get().getValorIva() != null && optionalEmpresa.get().getValorIva() > 0d){
+						total += total*(optionalEmpresa.get().getValorIva()/100);
+					}else{
+						total += total*0.16;
+					}
+
+				}
+				if (optionalEmpresa.get().getPorcentajeGanancia() != null && optionalEmpresa.get().getPorcentajeGanancia() > 0){
+					ganancia = total*(optionalEmpresa.get().getPorcentajeGanancia()/100);
+					total += ganancia;
+				}
+			}
+
+			ProductoHistory productoHistory = new ProductoHistory();
+			productoHistory.setPrecioVenta(total);
+			productoHistory.setProducto(new Producto(productoDTO.getProductoId()));
+			productoHistory.setFechaCreacion(LocalDateTime.now(ZoneId.systemDefault()));
+			productoHistoryRepository.save(productoHistory);
+
+		}
+	}
+
+	private Page<ProductoDTO> doLogic(Page<ProductoDTO> pageProductos, UsuarioDTO usuarioDTO){
+
+		for (ProductoDTO productoDTO: pageProductos.getContent()) {
+			List<ProductoMaterialDTO> pageProductosMateriales = productoMaterialRepository.findByProducto_Empresa_EmpresaIdAndProducto_ProductoIdAndProducto_ActivoAndMaterial_Activo(usuarioDTO.getEmpresaId(), productoDTO.getProductoId(), Boolean.TRUE, Boolean.TRUE)
+					.stream()
+					.map(ProductoMapper.INSTANCE::productoMaterialToProductoMaterialDTO)
+					.collect(Collectors.toList());
+
+			Set<Long> materialIds = pageProductosMateriales.stream().map(m -> m.getMaterial().getMaterialId()).collect(Collectors.toSet());
+			Set<Long> tipoUnidadIds = pageProductosMateriales.stream().map(m -> m.getTipoUnidad().getTipoUnidadId()).collect(Collectors.toSet());
+
+			Map<Long, MaterialDTO> materialMap = materialRepository.findByMaterialIdIn(materialIds)
+					.stream()
+					.map(ProductoMapper.INSTANCE::materialToMaterialDTO)
+					.collect(Collectors.toMap(MaterialDTO::getMaterialId, m -> m));
+
+			tipoUnidadIds.addAll(materialMap.values().stream().map(m -> m.getTipoUnidad().getTipoUnidadId()).collect(Collectors.toList()));
+
+			Map<Long, TipoUnidadDTO> tipoUnidadMap = tipoUnidadRepository.findByTipoUnidadIdIn(tipoUnidadIds)
+					.stream()
+					.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
+					.collect(Collectors.toMap(TipoUnidadDTO::getTipoUnidadId, t -> t));
+
+			materialMap.forEach( (k,v) -> {
+				v.setTipoUnidad(tipoUnidadMap.get(v.getTipoUnidad().getTipoUnidadId()));
+			} );
+
+			pageProductosMateriales.forEach(p -> {
+				p.setMaterial(materialMap.get(p.getMaterial().getMaterialId()));
+				p.setTipoUnidad(tipoUnidadMap.get(p.getTipoUnidad().getTipoUnidadId()));
+			});
+
+			Double total = 0D;
+			for(ProductoMaterialDTO pmDTO:pageProductosMateriales) {
+
+				Double costoCompra = pmDTO.getMaterial().getCosto();
+				//CONVIERTE LA CANTIDAD COMPRADA DE CUALQUIER UNIDAD A GRAMOS
+				Double cantidadCompra = pmDTO.getMaterial().getCantidadCompra() * pmDTO.getMaterial().getTipoUnidad().getReferenciaEnGramos();
+				Double cantidadUsada = pmDTO.getCantidad() * pmDTO.getTipoUnidad().getReferenciaEnGramos();
+
+				total += (costoCompra*cantidadUsada)/cantidadCompra;
+			}
+
+			DecimalFormat df = new DecimalFormat("#,###,##0.00");
+			productoDTO.setCostoProduccion(df.format(total));
+			Optional<Empresa> optionalEmpresa = empresaRepository.findById(usuarioDTO.getEmpresaId());
+			Double ganancia = 0d;
+			if (optionalEmpresa.isPresent()){
+				if (optionalEmpresa.get().getIva()){
+					if (optionalEmpresa.get().getValorIva() != null && optionalEmpresa.get().getValorIva() > 0d){
+						total += total*(optionalEmpresa.get().getValorIva()/100);
+					}else{
+						total += total*0.16;
+					}
+
+				}
+				if (optionalEmpresa.get().getPorcentajeGanancia() != null && optionalEmpresa.get().getPorcentajeGanancia() > 0){
+					ganancia = total*(optionalEmpresa.get().getPorcentajeGanancia()/100);
+					total += ganancia;
+				}
+			}
+			productoDTO.setPrecioVenta(df.format(total));
+			productoDTO.setGanancia(df.format(ganancia));
 		}
 		return pageProductos;
 	}

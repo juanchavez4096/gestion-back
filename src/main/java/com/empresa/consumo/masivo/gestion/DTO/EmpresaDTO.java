@@ -15,4 +15,10 @@ public class EmpresaDTO {
     @NotEmpty
     private String nombre;
     private Boolean enabled;
+    private Boolean iva;
+    private Double valorIva;
+    private Double porcentajeGanancia;
+    private Boolean mostrarPrecioDolar;
+    private Boolean actualizarDolarAuto;
+    private Double precioDolar;
 }
