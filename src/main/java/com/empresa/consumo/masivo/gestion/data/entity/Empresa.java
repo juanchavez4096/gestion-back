@@ -33,6 +33,18 @@ public class Empresa implements java.io.Serializable {
 	private String nombre;
 	@Column(name = "enabled", nullable = false)
 	private Boolean enabled;
+	@Column(name = "iva", nullable = false)
+	private Boolean iva;
+	@Column(name = "valor_iva", nullable = false)
+	private Double valorIva;
+	@Column(name = "porcentaje_ganancia", nullable = false)
+	private Double porcentajeGanancia;
+	@Column(name = "mostrar_precio_dolar", nullable = false)
+	private Boolean mostrarPrecioDolar;
+	@Column(name = "actualizar_dolar_auto", nullable = false)
+	private Boolean actualizarDolarAuto;
+	@Column(name = "precio_dolar", nullable = false)
+	private Double precioDolar;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "empresa")
 	private Set<Producto> productos = new HashSet<>(0);
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "empresa")

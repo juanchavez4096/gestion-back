@@ -19,7 +19,7 @@ public interface ProductoMapper {
 	ProductoMapper INSTANCE = Mappers.getMapper( ProductoMapper.class );
 	//To DTO
 	@Mappings({
-			@Mapping(target = "costo", ignore = true)
+			@Mapping(target = "costoProduccion", ignore = true)
 	   })
 	ProductoDTO productoToProductoDTO(Producto producto); 
 	@Mappings({

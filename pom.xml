@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>com.empresa.consumo.masivo</groupId>
 	<artifactId>gestion</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<name>gestion</name>
 	<description>Aplicación Informática para la gestión de costos operativos de una empresa de consumo masivo</description>
 
@@ -19,6 +19,7 @@
 		<java.version>1.8</java.version>
 		<org.mapstruct.version>1.2.0.Final</org.mapstruct.version>
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
+		<spring-cloud.version>Greenwich.RELEASE</spring-cloud.version>
 	</properties>
 
 	<dependencies>
@@ -107,7 +108,23 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
     </dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>

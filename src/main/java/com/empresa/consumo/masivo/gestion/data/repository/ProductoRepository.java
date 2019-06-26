@@ -6,10 +6,15 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.empresa.consumo.masivo.gestion.data.entity.Producto;
 
+import java.util.List;
+
 public interface ProductoRepository extends CrudRepository<Producto, Long> {
 
 	Page<Producto> findByEmpresa_EmpresaIdAndActivoOrderByNombre(Long empresaId, Boolean activo,Pageable pageable);
 	Page<Producto> findByEmpresa_EmpresaIdAndActivoAndNombreContainingIgnoreCaseOrderByNombre(Long empresaId, Boolean activo, String search,Pageable pageable);
+
+	List<Producto> findByProductoMaterials_Material_MaterialId(Long materialId);
+	List<Producto> findByProductoId(Long productoId);
 
 	Page<Producto> findByProductoIdAndEmpresa_EmpresaIdAndActivo(Long productoId, Long empresaId, Boolean activo,Pageable pageable);
 	Boolean existsByProductoIdAndEmpresa_EmpresaId(Long productoId, Long empresaId);

@@ -18,7 +18,9 @@ public class ProductoDTO implements Serializable {
 	@NotNull
 	@NotEmpty
 	private String nombre;
-	private Double costo;
+	private String costoProduccion;
+	private String precioVenta;
+	private String ganancia;
 	
 	public ProductoDTO() {
 		super();

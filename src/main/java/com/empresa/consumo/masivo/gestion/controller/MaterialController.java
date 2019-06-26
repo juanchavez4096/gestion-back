@@ -58,6 +58,8 @@ public class MaterialController {
 	private UsuarioRepository usuarioRepository;
 	@Autowired
 	private UploadService uploadService;
+	@Autowired
+	private ProductoController productoController;
 	
 	//DONE
 	@RequestMapping(value="all", method = RequestMethod.GET)
@@ -207,10 +209,13 @@ public class MaterialController {
 			material.setEmpresa(new Empresa(usuarioDTO.getEmpresaId()));
 			material.setActivo(Boolean.TRUE);
 			materialRepository.save(material);
+			productoController.getAllProductsByMaterialIdWithUpdate(material.getMaterialId(), usuarioDTO.getEmpresaId(),false);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
+
+
 		
 	}
 	
@@ -227,6 +232,7 @@ public class MaterialController {
 		if (material.getEmpresa().getEmpresaId().longValue() == usuarioDTO.getEmpresaId().longValue()) {
 			material.setActivo(Boolean.FALSE);
 			materialRepository.save(material);
+			productoController.getAllProductsByMaterialIdWithUpdate(material.getMaterialId(), usuarioDTO.getEmpresaId(), false);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
