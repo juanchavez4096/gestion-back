@@ -40,6 +40,8 @@ public class Producto implements java.io.Serializable {
 	private String nombre;
 	@Column(name = "activo", nullable = false)
 	private Boolean activo;
+	@Column(name = "depreciacion", nullable = false)
+	private Double depreciacion;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "producto")
 	private Set<ProductoMaterial> productoMaterials = new HashSet<>(0);
 
@@ -51,16 +53,12 @@ public class Producto implements java.io.Serializable {
 		this.productoId = productoId;
 	}
 
-
-
 	public Producto(Empresa empresa, String nombre) {
 		super();
 		this.empresa = empresa;
 		this.nombre = nombre;
 		this.activo = true;
 	}
-
-
 
 	public Producto(Long productoId, Empresa empresa, String nombre) {
 		this.productoId = productoId;

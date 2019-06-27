@@ -1,13 +1,7 @@
 package com.empresa.consumo.masivo.gestion.convertor;
 
-import com.empresa.consumo.masivo.gestion.DTO.MaterialDTO;
-import com.empresa.consumo.masivo.gestion.DTO.ProductoDTO;
-import com.empresa.consumo.masivo.gestion.DTO.ProductoMaterialDTO;
-import com.empresa.consumo.masivo.gestion.DTO.TipoUnidadDTO;
-import com.empresa.consumo.masivo.gestion.data.entity.Material;
-import com.empresa.consumo.masivo.gestion.data.entity.Producto;
-import com.empresa.consumo.masivo.gestion.data.entity.ProductoMaterial;
-import com.empresa.consumo.masivo.gestion.data.entity.TipoUnidad;
+import com.empresa.consumo.masivo.gestion.DTO.*;
+import com.empresa.consumo.masivo.gestion.data.entity.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -50,4 +44,7 @@ public interface ProductoMapper {
 		@Mapping(target = "productoMaterials", ignore = true)
 	   }) 
 	TipoUnidad tipoUnidadDTOToTipoUnidad(TipoUnidadDTO tipoUnidadDTO);
+
+
+	ProductoHistoryDTO productoHistoryToProductoHistoryDTO(ProductoHistory productoHistory);
 }

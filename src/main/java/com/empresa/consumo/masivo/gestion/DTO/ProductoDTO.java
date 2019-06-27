@@ -21,6 +21,8 @@ public class ProductoDTO implements Serializable {
 	private String costoProduccion;
 	private String precioVenta;
 	private String ganancia;
+	private Double depreciacion;
+	private String precioVentaDolares;
 	
 	public ProductoDTO() {
 		super();

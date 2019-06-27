@@ -240,8 +240,6 @@ public class MaterialController {
 		
 	}
 
-
-	
 	@RequestMapping(path = "file/upload", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file,
 			 @RequestParam("materialId") String materialId, @AuthenticationPrincipal UsuarioDTO usuarioDTO)
@@ -307,16 +305,12 @@ public class MaterialController {
 		} else {
 			return uploadService.downloadMaterialImageMed(Long.parseLong(materialId), request, response);
 		}
-
 	}
 
 	@RequestMapping(path = "file/delete", method = RequestMethod.DELETE)
 	public ResponseEntity<Long> deleteFile(@RequestParam("materialId") String materialId, @AuthenticationPrincipal UsuarioDTO usuarioDTO,
-			 HttpServletRequest request) throws IllegalStateException, IOException,
-			 InvalidFileException {
+			 HttpServletRequest request) throws IllegalStateException{
 
-		
-		
 		if (!materialRepository.existsByMaterialIdAndEmpresa_EmpresaId(Long.parseLong(materialId), usuarioDTO.getEmpresaId())) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}

@@ -15,6 +15,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import com.empresa.consumo.masivo.gestion.DTO.*;
 import com.empresa.consumo.masivo.gestion.data.entity.ProductoHistory;
 import com.empresa.consumo.masivo.gestion.data.repository.*;
 import com.empresa.consumo.masivo.gestion.exception.BusinessServiceException;
@@ -38,11 +39,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.empresa.consumo.masivo.gestion.DTO.MaterialDTO;
-import com.empresa.consumo.masivo.gestion.DTO.ProductoDTO;
-import com.empresa.consumo.masivo.gestion.DTO.ProductoMaterialDTO;
-import com.empresa.consumo.masivo.gestion.DTO.TipoUnidadDTO;
-import com.empresa.consumo.masivo.gestion.DTO.UsuarioDTO;
 import com.empresa.consumo.masivo.gestion.convertor.ProductoMapper;
 import com.empresa.consumo.masivo.gestion.data.entity.Empresa;
 import com.empresa.consumo.masivo.gestion.data.entity.Producto;
@@ -93,6 +89,21 @@ public class ProductoController {
 		
 		
 		return new ResponseEntity<>(newPageProductos, HttpStatus.OK);
+	}
+
+	@RequestMapping(value="last10History", method = RequestMethod.GET)
+	public ResponseEntity<List<ProductoHistoryDTO>> getLast10Products(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @RequestParam(value = "productoId") Long productoId) {
+
+		if (usuarioDTO.getEmpresaId() == null) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+
+		List<ProductoHistoryDTO> productoHistoryDTOS = productoHistoryRepository.findFirst10ByProducto_ProductoIdOrderByFechaCreacionDesc(productoId)
+				.stream()
+				.map(ProductoMapper.INSTANCE::productoHistoryToProductoHistoryDTO)
+				.collect(Collectors.toList());
+
+		return new ResponseEntity<>(productoHistoryDTOS, HttpStatus.OK);
 	}
 
 	@RequestMapping(value="byId", method = RequestMethod.GET)
@@ -170,7 +181,9 @@ public class ProductoController {
 				total += (costoCompra*cantidadUsada)/cantidadCompra;
 			}
 
-
+			if (productoDTO.getDepreciacion() != null && productoDTO.getDepreciacion() > 0d){
+				total += total*(productoDTO.getDepreciacion()/100);
+			}
 
 			Optional<Empresa> optionalEmpresa = empresaRepository.findById(empresaId);
 			Double ganancia = 0d;
@@ -187,6 +200,7 @@ public class ProductoController {
 					ganancia = total*(optionalEmpresa.get().getPorcentajeGanancia()/100);
 					total += ganancia;
 				}
+
 			}
 
 			ProductoHistory productoHistory = new ProductoHistory();
@@ -242,9 +256,13 @@ public class ProductoController {
 			}
 
 			DecimalFormat df = new DecimalFormat("#,###,##0.00");
+			if (productoDTO.getDepreciacion() != null && productoDTO.getDepreciacion() > 0d){
+				total += total*(productoDTO.getDepreciacion()/100);
+			}
 			productoDTO.setCostoProduccion(df.format(total));
 			Optional<Empresa> optionalEmpresa = empresaRepository.findById(usuarioDTO.getEmpresaId());
 			Double ganancia = 0d;
+			Double precioDolares = 0d;
 			if (optionalEmpresa.isPresent()){
 				if (optionalEmpresa.get().getIva()){
 					if (optionalEmpresa.get().getValorIva() != null && optionalEmpresa.get().getValorIva() > 0d){
@@ -252,15 +270,22 @@ public class ProductoController {
 					}else{
 						total += total*0.16;
 					}
-
 				}
+
 				if (optionalEmpresa.get().getPorcentajeGanancia() != null && optionalEmpresa.get().getPorcentajeGanancia() > 0){
 					ganancia = total*(optionalEmpresa.get().getPorcentajeGanancia()/100);
 					total += ganancia;
 				}
+
+				if (optionalEmpresa.get().getPrecioDolar() != null && optionalEmpresa.get().getPrecioDolar() > 0d){
+					precioDolares = total/optionalEmpresa.get().getPrecioDolar();
+				}
+
 			}
 			productoDTO.setPrecioVenta(df.format(total));
 			productoDTO.setGanancia(df.format(ganancia));
+			productoDTO.setPrecioVentaDolares(df.format(precioDolares));
+
 		}
 		return pageProductos;
 	}
@@ -307,7 +332,9 @@ public class ProductoController {
 		Producto producto = productoRepository.findById(productoDTO.getProductoId()).get();
 		if (producto.getEmpresa().getEmpresaId().longValue() == usuarioDTO.getEmpresaId().longValue()) {
 			producto.setNombre(productoDTO.getNombre().trim());
+			producto.setDepreciacion(productoDTO.getDepreciacion());
 			productoRepository.save(producto);
+			this.getAllProductsByMaterialIdWithUpdate(producto.getProductoId(), usuarioDTO.getEmpresaId(),true);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -347,9 +374,6 @@ public class ProductoController {
 		if (responseEntity != null ) {
 			return responseEntity;
 		}
-		
-		
-
 		
 		String fileName = uploadService.uploadProductoImage(file, Long.parseLong(productoId));
 

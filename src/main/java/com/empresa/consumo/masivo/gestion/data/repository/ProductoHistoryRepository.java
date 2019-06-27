@@ -10,5 +10,6 @@ import com.empresa.consumo.masivo.gestion.data.entity.Empresa;
 import java.util.List;
 
 public interface ProductoHistoryRepository extends CrudRepository<ProductoHistory, Long> {
+    List<ProductoHistory> findFirst10ByProducto_ProductoIdOrderByFechaCreacionDesc(Long productoId);
 
 }
