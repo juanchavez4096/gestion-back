@@ -311,7 +311,7 @@ public class ProductoController {
 			}
 		}
 
-		ProductoDTO savedProducto = ProductoMapper.INSTANCE.productoToProductoDTO(productoRepository.save(new Producto(new Empresa(usuarioDTO.getEmpresaId()), nombre.trim() ))) ;
+		ProductoDTO savedProducto = ProductoMapper.INSTANCE.productoToProductoDTO(productoRepository.save(new Producto(new Empresa(usuarioDTO.getEmpresaId()), nombre.trim(), 0d ))) ;
 		if (file != null) {
 			String fileName = uploadService.uploadProductoImage(file, savedProducto.getProductoId());
 		}

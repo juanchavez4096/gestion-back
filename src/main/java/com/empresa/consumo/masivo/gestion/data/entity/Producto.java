@@ -53,23 +53,26 @@ public class Producto implements java.io.Serializable {
 		this.productoId = productoId;
 	}
 
-	public Producto(Empresa empresa, String nombre) {
+	public Producto(Empresa empresa, String nombre, Double depreciacion) {
 		super();
 		this.empresa = empresa;
 		this.nombre = nombre;
+		this.depreciacion = depreciacion;
 		this.activo = true;
 	}
 
-	public Producto(Long productoId, Empresa empresa, String nombre) {
+	public Producto(Long productoId, Empresa empresa, String nombre, Double depreciacion) {
 		this.productoId = productoId;
 		this.empresa = empresa;
 		this.nombre = nombre;
+		this.depreciacion = depreciacion;
 	}
 
-	public Producto(Long productoId, Empresa empresa, String nombre, Set productoMaterials) {
+	public Producto(Long productoId, Empresa empresa, String nombre, Double depreciacion, Set productoMaterials) {
 		this.productoId = productoId;
 		this.empresa = empresa;
 		this.nombre = nombre;
+		this.depreciacion = depreciacion;
 		this.productoMaterials = productoMaterials;
 	}
 
