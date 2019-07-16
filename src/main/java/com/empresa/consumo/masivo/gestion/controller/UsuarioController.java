@@ -217,8 +217,6 @@ public class UsuarioController {
 		boolean success = false;
 
 		success = usuarioService.changeForgottenPassword(email, newPassword, codigoVerificion);
-
-
 		return new ResponseEntity<>(success, HttpStatus.OK);
 
 	}
