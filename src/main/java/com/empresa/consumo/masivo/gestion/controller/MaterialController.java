@@ -14,6 +14,7 @@ import com.empresa.consumo.masivo.gestion.exception.ImageNotFoundException;
 import com.empresa.consumo.masivo.gestion.exception.InvalidFileException;
 import com.empresa.consumo.masivo.gestion.exception.InvalidMaterialException;
 import com.empresa.consumo.masivo.gestion.security.JwtService;
+import com.empresa.consumo.masivo.gestion.service.PdfService;
 import com.empresa.consumo.masivo.gestion.service.UploadService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -39,6 +40,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,6 +63,8 @@ public class MaterialController {
 	private UploadService uploadService;
 	@Autowired
 	private ProductoController productoController;
+	@Autowired
+	private PdfService pdfService;
 	
 	//DONE
 	@RequestMapping(value="all", method = RequestMethod.GET)
@@ -181,6 +186,7 @@ public class MaterialController {
 		material.setNombre(material.getNombre().trim());
 		material.setEmpresa(new Empresa(usuarioDTO.getEmpresaId()));
 		material.setActivo(Boolean.TRUE);
+		material.setFechaCreacion(LocalDateTime.now(ZoneId.systemDefault()));
 		MaterialDTO savedMaterial = ProductoMapper.INSTANCE.materialToMaterialDTO(materialRepository.save(material)) ;
 		if (file != null) {
 			String fileName = uploadService.uploadMaterialImage(file, savedMaterial.getMaterialId());
@@ -203,13 +209,15 @@ public class MaterialController {
 		}
 		
 		Material material = materialRepository.findById(materialDTO.getMaterialId()).get();
+		LocalDateTime fechaCreacion = material.getFechaCreacion();
 		if (material.getEmpresa().getEmpresaId().longValue() == usuarioDTO.getEmpresaId().longValue()) {
 			material = ProductoMapper.INSTANCE.materialDTOToMaterial(materialDTO);
 			material.setNombre(material.getNombre().trim());
 			material.setEmpresa(new Empresa(usuarioDTO.getEmpresaId()));
 			material.setActivo(Boolean.TRUE);
+			material.setFechaCreacion(fechaCreacion);
 			materialRepository.save(material);
-			productoController.getAllProductsByMaterialIdWithUpdate(material.getMaterialId(), usuarioDTO.getEmpresaId(),false);
+			productoController.getAllProductsByMaterialIdWithUpdate(material.getMaterialId(), usuarioDTO.getEmpresaId(),false, null, null);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -232,7 +240,7 @@ public class MaterialController {
 		if (material.getEmpresa().getEmpresaId().longValue() == usuarioDTO.getEmpresaId().longValue()) {
 			material.setActivo(Boolean.FALSE);
 			materialRepository.save(material);
-			productoController.getAllProductsByMaterialIdWithUpdate(material.getMaterialId(), usuarioDTO.getEmpresaId(), false);
+			productoController.getAllProductsByMaterialIdWithUpdate(material.getMaterialId(), usuarioDTO.getEmpresaId(), false, null, null);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -320,6 +328,5 @@ public class MaterialController {
 
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
-	
 	
 }

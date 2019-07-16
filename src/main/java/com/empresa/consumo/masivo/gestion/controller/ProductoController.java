@@ -124,17 +124,22 @@ public class ProductoController {
 		}
 	}
 
-
-	public void getAllProductsByMaterialIdWithUpdate(Long materialIdOrProductoId, Long empresaId, Boolean productoId) {
+	public List<ProductoDTO> getAllProductsByMaterialIdWithUpdate(Long materialIdOrProductoId, Long empresaId, Boolean productoId, Date desde, Date hasta) {
 
 		List<ProductoDTO> productoDTOS = new ArrayList<>();
-		if (productoId){
-			productoDTOS = productoRepository.findByProductoId(materialIdOrProductoId).stream().map
-					(ProductoMapper.INSTANCE::productoToProductoDTO).collect(Collectors.toList());
+		if (materialIdOrProductoId != null){
+			if (productoId){
+				productoDTOS = productoRepository.findByProductoId(materialIdOrProductoId).stream().map
+						(ProductoMapper.INSTANCE::productoToProductoDTO).collect(Collectors.toList());
+			}else {
+				productoDTOS = productoRepository.findByProductoMaterials_Material_MaterialId(materialIdOrProductoId).stream().map
+						(ProductoMapper.INSTANCE::productoToProductoDTO).collect(Collectors.toList());
+			}
 		}else {
-			productoDTOS = productoRepository.findByProductoMaterials_Material_MaterialId(materialIdOrProductoId).stream().map
-					(ProductoMapper.INSTANCE::productoToProductoDTO).collect(Collectors.toList());
+			productoDTOS = productoRepository.findByEmpresa_EmpresaIdAndActivoAndFechaCreacionBetweenOrderByNombre(empresaId, Boolean.TRUE, LocalDateTime.ofInstant(desde.toInstant(), ZoneId.systemDefault()), LocalDateTime.ofInstant(hasta.toInstant(), ZoneId.systemDefault()))
+					.stream().map(ProductoMapper.INSTANCE::productoToProductoDTO).collect(Collectors.toList());
 		}
+
 
 
 		for (ProductoDTO productoDTO:productoDTOS){
@@ -142,9 +147,6 @@ public class ProductoController {
 					.stream()
 					.map(ProductoMapper.INSTANCE::productoMaterialToProductoMaterialDTO)
 					.collect(Collectors.toList());
-
-
-
 
 			Set<Long> materialIds = pageProductosMateriales.stream().map(m -> m.getMaterial().getMaterialId()).collect(Collectors.toSet());
 			Set<Long> tipoUnidadIds = pageProductosMateriales.stream().map(m -> m.getTipoUnidad().getTipoUnidadId()).collect(Collectors.toSet());
@@ -185,8 +187,15 @@ public class ProductoController {
 				total += total*(productoDTO.getDepreciacion()/100);
 			}
 
+
+			DecimalFormat df = new DecimalFormat("#,###,##0.00");
+			if (productoDTO.getDepreciacion() != null && productoDTO.getDepreciacion() > 0d){
+				total += total*(productoDTO.getDepreciacion()/100);
+			}
+			productoDTO.setCostoProduccion(df.format(total));
 			Optional<Empresa> optionalEmpresa = empresaRepository.findById(empresaId);
 			Double ganancia = 0d;
+			Double precioDolares = 0d;
 			if (optionalEmpresa.isPresent()){
 				if (optionalEmpresa.get().getIva()){
 					if (optionalEmpresa.get().getValorIva() != null && optionalEmpresa.get().getValorIva() > 0d){
@@ -194,22 +203,28 @@ public class ProductoController {
 					}else{
 						total += total*0.16;
 					}
-
 				}
 				if (optionalEmpresa.get().getPorcentajeGanancia() != null && optionalEmpresa.get().getPorcentajeGanancia() > 0){
 					ganancia = total*(optionalEmpresa.get().getPorcentajeGanancia()/100);
 					total += ganancia;
 				}
-
+				if (optionalEmpresa.get().getPrecioDolar() != null && optionalEmpresa.get().getPrecioDolar() > 0d){
+					precioDolares = total/optionalEmpresa.get().getPrecioDolar();
+				}
 			}
+			productoDTO.setPrecioVenta(df.format(total));
+			productoDTO.setGanancia(df.format(ganancia));
+			productoDTO.setPrecioVentaDolares(df.format(precioDolares));
 
-			ProductoHistory productoHistory = new ProductoHistory();
-			productoHistory.setPrecioVenta(total);
-			productoHistory.setProducto(new Producto(productoDTO.getProductoId()));
-			productoHistory.setFechaCreacion(LocalDateTime.now(ZoneId.systemDefault()));
-			productoHistoryRepository.save(productoHistory);
-
+			if (materialIdOrProductoId != null){
+				ProductoHistory productoHistory = new ProductoHistory();
+				productoHistory.setPrecioVenta(total);
+				productoHistory.setProducto(new Producto(productoDTO.getProductoId()));
+				productoHistory.setFechaCreacion(LocalDateTime.now(ZoneId.systemDefault()));
+				productoHistoryRepository.save(productoHistory);
+			}
 		}
+		return productoDTOS;
 	}
 
 	private Page<ProductoDTO> doLogic(Page<ProductoDTO> pageProductos, UsuarioDTO usuarioDTO){
@@ -311,7 +326,7 @@ public class ProductoController {
 			}
 		}
 
-		ProductoDTO savedProducto = ProductoMapper.INSTANCE.productoToProductoDTO(productoRepository.save(new Producto(new Empresa(usuarioDTO.getEmpresaId()), nombre.trim(), 0d ))) ;
+		ProductoDTO savedProducto = ProductoMapper.INSTANCE.productoToProductoDTO(productoRepository.save(new Producto(new Empresa(usuarioDTO.getEmpresaId()), nombre.trim(), 0d, LocalDateTime.now(ZoneId.systemDefault()) ))) ;
 		if (file != null) {
 			String fileName = uploadService.uploadProductoImage(file, savedProducto.getProductoId());
 		}
@@ -334,7 +349,7 @@ public class ProductoController {
 			producto.setNombre(productoDTO.getNombre().trim());
 			producto.setDepreciacion(productoDTO.getDepreciacion());
 			productoRepository.save(producto);
-			this.getAllProductsByMaterialIdWithUpdate(producto.getProductoId(), usuarioDTO.getEmpresaId(),true);
+			this.getAllProductsByMaterialIdWithUpdate(producto.getProductoId(), usuarioDTO.getEmpresaId(),true, null, null);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);

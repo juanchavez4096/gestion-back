@@ -1,6 +1,8 @@
 package com.empresa.consumo.masivo.gestion.data.repository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -18,4 +20,6 @@ public interface MaterialRepository extends CrudRepository<Material, Long> {
 	Page<Material> findByMaterialIdAndEmpresa_EmpresaIdAndActivo(Long materialId,Long empresaId, Boolean activo, Pageable pageable);
 	Boolean existsByMaterialIdAndEmpresa_EmpresaId(Long materialId, Long empresaId);
 	List<Material> findByMaterialIdIn(Collection<Long> materialIds);
+
+	List<Material> findByEmpresa_EmpresaIdAndActivoAndFechaCreacionBetweenOrderByNombre(Long empresaId, Boolean activo, LocalDateTime desde, LocalDateTime hasta);
 }

@@ -1,0 +1,274 @@
+@page {
+	size: A4 portrait;
+	margin-top: 85px;
+	margin-right: 45px;
+	margin-left: 45px;
+	margin-bottom: 125px;
+	/*margin-bottom: 130px;*/
+	@top-center {
+		content: element(header);
+	}
+	@bottom-center {
+		content: element(footer);
+	}
+}
+
+img{
+	vertical-align: middle;
+}
+div.header{
+	margin-top: 15px;
+	text-align: center;
+	position: running(header);
+	padding-bottom: 10px;
+}
+
+div.footer{
+	/*margin-bottom: 80px;*/
+	display: block;
+	text-align: left;
+	position: running(footer);
+}
+div.content{
+    margin-left: -9px !important;
+    margin-right: -9px !important;
+	/*width: 17cm;*/
+	/*page-break-after: always;*/
+}
+body {
+	font-size: 15px;
+	font-family: Calibri,Candara,Segoe,Segoe UI,Optima,Arial,sans-serif;
+}
+
+.columns {
+	border: 1px solid #333;
+}
+
+div.row{
+	background-color: blue;
+}
+
+table.content{
+    border-collapse: separate !important;
+    border-spacing: 0;
+    /*border: solid #ccc 1px;*/
+    border-radius: 5px;
+}
+
+table.content tr th{
+	height: auto !important;
+	position: relative;
+	top: 0;
+	vertical-align: top;
+	border: 1px solid #E1E1E0;
+	background-color: #E1E1E0;
+	font-weight: 700;
+}
+
+table.content tr th div{
+	padding-right: 5px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+
+	position: relative;
+	top: 0;
+	color: #929292;
+	text-align: right;
+
+}
+
+table.content tr td div{
+	padding-top: 3px;
+	padding-bottom: 3px;
+	color: #0E2138;
+    margin-left: 18px;
+	word-wrap:break-word;
+}
+
+table.content tr th.up{
+	border-top-left-radius: 7px;
+}
+table.content tr th.down{
+	border-bottom-left-radius: 7px;
+}
+
+table.content tr th.up div{
+	padding-top: 7px;
+}
+table.content tr th.down div{
+	padding-bottom: 7px;
+}
+
+
+table.content tr th.left{
+	border-top-left-radius: 7px;
+}
+table.content tr th.right{
+	border-top-right-radius: 7px;
+}
+
+table.changelog tr th div{
+	text-align: left !important;
+	margin-left: 0 !important;
+	padding-left: 5px !important;
+	padding-right: 5px !important;
+	margin-right: 0 !important;
+}
+table.changelog tr td div{
+	text-align: left !important;
+	margin-left: 0 !important;
+	padding-left: 5px !important;
+	padding-right: 5px !important;
+	margin-right: 0 !important;
+}
+
+
+
+
+div.table-content a span{
+	margin-left: 20px;
+}
+
+div.table-content a::after {
+	content: leader('.') target-counter(attr(href), page);
+}
+div.table-content a{
+	margin-right: 0;
+	padding-right: 0;
+}
+
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	-fs-table-paginate: paginate;
+}
+th, td{
+	border-collapse: collapse;
+}
+
+table.header tr th{
+	border-bottom: 1px solid #D8D6D5;
+}
+
+table.all tr th{
+	border: 1px solid #929292;
+	color: #929292;
+}
+
+table.all tr th div{
+	margin: 4px;
+	font-weight: 400;
+}
+
+hr.second{
+	border-left: 2px solid #D8D6D5;
+}
+
+hr.vertical {
+	width: 0px;
+	height: 50px;
+	padding: 0px;
+	margin-bottom: -1em;
+	margin-top: 40px;
+	display: inline-block;
+	/* or height in PX */
+}
+
+.variableOnEditor{
+
+	display: inline-block !important;
+	width: auto !important;
+	color: #1b455b !important;
+	background: #bfdbf5 !important;
+	text-align: center;
+	border-radius: 3px !important;
+	border: 1.4px solid #4f91ba !important;
+}
+
+.negrita{
+	font-weight: 700 !important;
+}
+
+.tab{
+	color: #929292;
+	background-color: #CCC7C7;
+	margin-bottom: 1px;
+	margin-top: 1px;
+	border-radius: 5px;
+}
+
+.tab-number{
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.tab-name{
+	padding-left: 16px;
+	padding-right: 16px;
+}
+
+.tab-date{
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+.subtitle{
+	color: #768CB7;
+	font-size: 25px;
+    font-weight: 700;
+}
+
+.title{
+	color: #768CB7;
+	font-size: 20px;
+	font-weight: 400;
+}
+
+
+a{
+	text-decoration: none;
+	color: #000000;
+}
+.task-name{
+    font-weight: 600;
+}
+
+.not-task-name{
+	margin-top: 11px;
+    font-weight: 400;
+	color: #0E2138;
+}
+
+.no-space{
+	margin-top: 11px;
+    margin-bottom: 3px;
+	color: #0E2138;
+}
+
+div.instructions{
+    border: 3px solid #E1E1E0;
+    border-radius: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 7.5px;
+    padding-bottom: 7.5px;
+	page-break-inside: avoid;
+}
+
+
+.p1{
+	color: #dc0f12;
+}
+
+.p2{
+	color: #f4932e;
+}
+
+.p3{
+	color: #136894;
+}
+
+.p4{
+	color: #0b9830;
+}

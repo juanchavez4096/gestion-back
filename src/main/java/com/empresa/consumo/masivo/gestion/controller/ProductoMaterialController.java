@@ -136,7 +136,7 @@ public class ProductoMaterialController {
 
 
 
-		productoController.getAllProductsByMaterialIdWithUpdate(productoMaterial.getProducto().getProductoId(), usuarioDTO.getEmpresaId(), true);
+		productoController.getAllProductsByMaterialIdWithUpdate(productoMaterial.getProducto().getProductoId(), usuarioDTO.getEmpresaId(), true, null, null);
 
 
 
@@ -167,7 +167,7 @@ public class ProductoMaterialController {
 			productoMaterial.get().setCantidad(modifyProductoMaterialDTO.getCantidad());
 			productoMaterial.get().setTipoUnidad(ProductoMapper.INSTANCE.tipoUnidadDTOToTipoUnidad(modifyProductoMaterialDTO.getTipoUnidad()));
 			productoMaterialRepository.save(productoMaterial.get());
-			productoController.getAllProductsByMaterialIdWithUpdate(productoMaterial.get().getProducto().getProductoId(), usuarioDTO.getEmpresaId(), true);
+			productoController.getAllProductsByMaterialIdWithUpdate(productoMaterial.get().getProducto().getProductoId(), usuarioDTO.getEmpresaId(), true, null, null);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -192,7 +192,7 @@ public class ProductoMaterialController {
 
 		if (producto.getEmpresa().getEmpresaId().longValue() == usuarioDTO.getEmpresaId().longValue()) {
 			productoMaterialRepository.delete(productoMaterial.get());
-			productoController.getAllProductsByMaterialIdWithUpdate(producto.getProductoId(), usuarioDTO.getEmpresaId(), true);
+			productoController.getAllProductsByMaterialIdWithUpdate(producto.getProductoId(), usuarioDTO.getEmpresaId(), true, null, null);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);

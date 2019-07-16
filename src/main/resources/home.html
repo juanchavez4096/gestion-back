@@ -1,0 +1,120 @@
+
+<html lang="EN-US" xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta charset="UTF-8" />
+	<meta name="subject" content="PDF intelenz"/>
+	<meta name="author" content="Intelenz"/>
+	<meta name="description" content="Process PDF"/>
+
+	<!--   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> -->
+<!--   <meta name="viewport" content="width=device-width"/> -->
+
+
+<title>[[${titulo}]]: Gestión de Costos Operativos</title>
+	<link rel="stylesheet" href="/css/styles.css" th:href="@{http://localhost:3010/css/styles.css}" />
+</head>
+
+<body>
+
+	<div class="header">
+		<table class="header">
+			<col width="40%">
+			<col width="60%">
+			<tr>
+				<th style="text-align: left">
+					<div style="margin-bottom: 15px">
+
+
+						<span style="font-weight: 400; font-size: 17px; vertical-align: middle; margin-left: 7px">Gestión de Costos Operativos</span>
+					</div>
+
+				</th>
+				<th style="border-left: 2px solid #D8D6D5; ">
+					<div style="margin-bottom: 15px">
+						<div style="color: #868686; padding-right: 10px; text-align: right; font-weight: 400">
+							[[${titulo}]]
+						</div>
+					</div>
+
+				</th>
+			</tr>
+		</table>
+
+
+	</div>
+
+
+
+	<div class="footer">
+		<div style="margin-top: 5px; margin-bottom: 5px; color: #929292;">
+			<table>
+				<col width="150">
+				<col width="60">
+				<tr>
+					<th style="font-size: 15px; text-align: left; font-weight: 400">Desde [[${desde}]] hasta [[${hasta}]]</th>
+				</tr>
+				<tr>
+					<th style="font-size: 15px; text-align: left; font-weight: 400">Documento generado por [[${usuarioDTO.nombre}]] en [[${#temporals.format(hoy, 'MM/dd/yyyy hh:mm a')}]]</th>
+					<th style="font-size: 10px; text-align: right">Por: gestión de costos operativos</th>
+				</tr>
+			</table>
+
+		</div>
+	</div>
+
+	<div class="content">
+
+		<table class="all">
+			<tr>
+				<th>
+					<div>
+						Nombre del [[${titulo.equals("Productos") ? "Producto" : "Material"}]]
+					</div>
+				</th>
+				<th>
+					<div>
+						Depreciación
+					</div>
+				</th>
+				<th>
+					<div>
+						Costo de Producción
+					</div>
+				</th>
+				<th>
+					<div>
+						Ganancia
+					</div>
+				</th>
+				<th>
+					<div>
+						Precio de venta en dolares
+					</div>
+				</th>
+				<th>
+					<div>
+						Precio de venta
+					</div>
+				</th>
+			</tr>
+			<tr th:if="${titulo.equals('Productos')}" th:each="producto: ${pdf.list}">
+				<td>
+
+				</td>
+			</tr>
+			<tr th:unless="${titulo.equals('Productos')}" th:each="material: ${pdf.list}">
+				<td>
+
+				</td>
+			</tr>
+
+		</table>
+
+	</div>
+
+
+
+</body>
+
+</html>

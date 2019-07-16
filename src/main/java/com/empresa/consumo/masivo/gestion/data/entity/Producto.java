@@ -1,6 +1,7 @@
 package com.empresa.consumo.masivo.gestion.data.entity;
 // Generated 28/12/2018 07:26:27 PM by Hibernate Tools 5.3.6.Final
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,6 +43,8 @@ public class Producto implements java.io.Serializable {
 	private Boolean activo;
 	@Column(name = "depreciacion", nullable = false)
 	private Double depreciacion;
+	@Column(name = "fecha_creacion", nullable = false)
+	private LocalDateTime fechaCreacion;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "producto")
 	private Set<ProductoMaterial> productoMaterials = new HashSet<>(0);
 
@@ -53,26 +56,29 @@ public class Producto implements java.io.Serializable {
 		this.productoId = productoId;
 	}
 
-	public Producto(Empresa empresa, String nombre, Double depreciacion) {
+	public Producto(Empresa empresa, String nombre, Double depreciacion, LocalDateTime fechaCreacion) {
 		super();
 		this.empresa = empresa;
 		this.nombre = nombre;
 		this.depreciacion = depreciacion;
+		this.fechaCreacion = fechaCreacion;
 		this.activo = true;
 	}
 
-	public Producto(Long productoId, Empresa empresa, String nombre, Double depreciacion) {
+	public Producto(Long productoId, Empresa empresa, String nombre, Double depreciacion, LocalDateTime fechaCreacion) {
 		this.productoId = productoId;
 		this.empresa = empresa;
 		this.nombre = nombre;
 		this.depreciacion = depreciacion;
+		this.fechaCreacion = fechaCreacion;
 	}
 
-	public Producto(Long productoId, Empresa empresa, String nombre, Double depreciacion, Set productoMaterials) {
+	public Producto(Long productoId, Empresa empresa, String nombre, Double depreciacion, LocalDateTime fechaCreacion, Set productoMaterials) {
 		this.productoId = productoId;
 		this.empresa = empresa;
 		this.nombre = nombre;
 		this.depreciacion = depreciacion;
+		this.fechaCreacion = fechaCreacion;
 		this.productoMaterials = productoMaterials;
 	}
 
