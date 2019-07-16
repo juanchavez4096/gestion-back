@@ -212,7 +212,7 @@ public class UsuarioController {
 	@RequestMapping(path = "changeForgottenPassword", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<Boolean> changeForgottenPassword(@RequestParam(value = "email") String email,
 														@RequestParam(value = "newPassword") String newPassword,
-														@RequestParam(value = "codigoVerificacion") String codigoVerificion) {
+														@RequestParam(value = "codigoVerificacion") String codigoVerificion) throws UsuarioException {
 
 		boolean success = false;
 
