@@ -12,7 +12,7 @@
 
 
 <title>[[${titulo}]]: Gestión de Costos Operativos</title>
-	<link rel="stylesheet" href="/css/styles.css" th:href="@{http://localhost:3010/css/styles.css}" />
+	<link rel="stylesheet" href="/css/styles.css" th:href="@{http://localhost:8081/css/styles.css}" />
 </head>
 
 <body>
@@ -24,19 +24,15 @@
 			<tr>
 				<th style="text-align: left">
 					<div style="margin-bottom: 15px">
-
-
 						<span style="font-weight: 400; font-size: 17px; vertical-align: middle; margin-left: 7px">Gestión de Costos Operativos</span>
 					</div>
-
 				</th>
-				<th style="border-left: 2px solid #D8D6D5; ">
+				<th>
 					<div style="margin-bottom: 15px">
 						<div style="color: #868686; padding-right: 10px; text-align: right; font-weight: 400">
 							[[${titulo}]]
 						</div>
 					</div>
-
 				</th>
 			</tr>
 		</table>
@@ -52,7 +48,7 @@
 				<col width="150">
 				<col width="60">
 				<tr>
-					<th style="font-size: 15px; text-align: left; font-weight: 400">Desde [[${desde}]] hasta [[${hasta}]]</th>
+					<th style="font-size: 15px; text-align: left; font-weight: 400">Desde [[${#dates.format(desde, 'MM/dd/yyyy')}]] hasta [[${#dates.format(hasta, 'MM/dd/yyyy')}]]</th>
 				</tr>
 				<tr>
 					<th style="font-size: 15px; text-align: left; font-weight: 400">Documento generado por [[${usuarioDTO.nombre}]] en [[${#temporals.format(hoy, 'MM/dd/yyyy hh:mm a')}]]</th>
@@ -72,40 +68,99 @@
 						Nombre del [[${titulo.equals("Productos") ? "Producto" : "Material"}]]
 					</div>
 				</th>
-				<th>
+				<th th:if="${titulo.equals('Productos')}">
 					<div>
 						Depreciación
 					</div>
 				</th>
-				<th>
+				<th th:if="${titulo.equals('Productos')}">
 					<div>
 						Costo de Producción
 					</div>
 				</th>
-				<th>
+				<th th:if="${titulo.equals('Productos')}">
 					<div>
 						Ganancia
 					</div>
 				</th>
-				<th>
+				<th th:if="${titulo.equals('Productos')}">
 					<div>
 						Precio de venta en dolares
 					</div>
 				</th>
-				<th>
+				<th th:if="${titulo.equals('Productos')}">
 					<div>
 						Precio de venta
+					</div>
+				</th>
+				<th th:unless="${titulo.equals('Productos')}">
+					<div>
+						Costo de Compra
+					</div>
+				</th>
+				<th th:unless="${titulo.equals('Productos')}">
+					<div>
+						Cantidad
+					</div>
+				</th>
+				<th th:unless="${titulo.equals('Productos')}">
+					<div>
+						Tipo de unidad
 					</div>
 				</th>
 			</tr>
 			<tr th:if="${titulo.equals('Productos')}" th:each="producto: ${pdf.list}">
 				<td>
-
+					<div>
+						[[${producto.nombre}]]
+					</div>
+				</td>
+				<td>
+					<div>
+						[[${producto.depreciacion}]]%
+					</div>
+				</td>
+				<td>
+					<div>
+						[[${producto.costoProduccion}]]Bs
+					</div>
+				</td>
+				<td>
+					<div>
+						[[${producto.ganancia}]]Bs
+					</div>
+				</td>
+				<td>
+					<div>
+						[[${producto.precioVentaDolares}]]$
+					</div>
+				</td>
+				<td>
+					<div>
+						[[${producto.precioVenta}]]Bs
+					</div>
 				</td>
 			</tr>
 			<tr th:unless="${titulo.equals('Productos')}" th:each="material: ${pdf.list}">
 				<td>
-
+					<div>
+						[[${material.nombre}]]
+					</div>
+				</td>
+				<td>
+					<div>
+						[[${material.costo}]]Bs
+					</div>
+				</td>
+				<td>
+					<div>
+						[[${material.cantidadCompra}]]
+					</div>
+				</td>
+				<td>
+					<div>
+						[[${material.tipoUnidad.tipo}]]
+					</div>
 				</td>
 			</tr>
 

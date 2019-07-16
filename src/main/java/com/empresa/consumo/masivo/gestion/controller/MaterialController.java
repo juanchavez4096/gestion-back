@@ -121,6 +121,21 @@ public class MaterialController {
 		return pageMateriales;
 	}
 
+	public List<MaterialDTO> doLogic(List<MaterialDTO> pageMateriales, UsuarioDTO usuarioDTO){
+		Set<Long> tipoUnidadIds = pageMateriales.stream().map(m -> m.getTipoUnidad().getTipoUnidadId()).collect(Collectors.toSet());
+
+		Map<Long, TipoUnidadDTO> tipoUnidadMap = tipoUnidadRepository.findByTipoUnidadIdIn(tipoUnidadIds)
+				.stream()
+				.map(ProductoMapper.INSTANCE::tipoUnidadToTipoUnidadDTO)
+				.collect(Collectors.toMap(TipoUnidadDTO::getTipoUnidadId, t -> t));
+
+		pageMateriales.forEach(p -> {
+
+			p.setTipoUnidad(tipoUnidadMap.get(p.getTipoUnidad().getTipoUnidadId()));
+		});
+		return pageMateriales;
+	}
+
 	@RequestMapping(value="allWithOutPage", method = RequestMethod.GET)
 	public ResponseEntity<List<MaterialDTO>> getAllMaterialesWithOutPages(@AuthenticationPrincipal UsuarioDTO usuarioDTO) {
 

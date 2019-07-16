@@ -153,10 +153,18 @@ table.header tr th{
 
 table.all tr th{
 	border: 1px solid #929292;
-	color: #929292;
 }
 
 table.all tr th div{
+	margin: 4px;
+}
+
+table.all tr td{
+	border: 1px solid #929292;
+	color: #929292;
+}
+
+table.all tr td div{
 	margin: 4px;
 	font-weight: 400;
 }

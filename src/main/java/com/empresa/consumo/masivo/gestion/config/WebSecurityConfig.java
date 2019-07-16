@@ -36,7 +36,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         
         http.authorizeRequests()
-            .antMatchers("/registroUsuario.html","/resetPassword.html","/swagger-ui.html/**", "/api/swagger-ui.html/**", "/webjars/**", "/swagger-resources/**", "/v2/api-docs").permitAll()
+            .antMatchers("/registroUsuario.html","/resetPassword.html","/swagger-ui.html/**", "/api/swagger-ui.html/**", "/webjars/**", "/swagger-resources/**", "/v2/api-docs", "/css/styles.css", "/img/questions-suit-guy.png").permitAll()
             .and()
             .headers().frameOptions().sameOrigin();
 

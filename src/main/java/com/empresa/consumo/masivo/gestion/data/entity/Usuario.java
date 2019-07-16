@@ -42,6 +42,8 @@ public class Usuario implements java.io.Serializable {
 	private String password;
 	@Column(name = "enabled", nullable = false)
 	private Boolean enabled;
+	@Column(name = "codigo_recuperacion", nullable = false)
+	private String codigoRecuperacion;
 
 	public Usuario() {
 	}

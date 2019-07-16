@@ -1,9 +1,11 @@
 package com.empresa.consumo.masivo.gestion.service;
 
+import com.empresa.consumo.masivo.gestion.DTO.MaterialDTO;
 import com.empresa.consumo.masivo.gestion.DTO.Pdf;
 import com.empresa.consumo.masivo.gestion.DTO.UsuarioDTO;
 import com.empresa.consumo.masivo.gestion.controller.MaterialController;
 import com.empresa.consumo.masivo.gestion.controller.ProductoController;
+import com.empresa.consumo.masivo.gestion.convertor.ProductoMapper;
 import com.empresa.consumo.masivo.gestion.data.repository.MaterialRepository;
 import com.empresa.consumo.masivo.gestion.data.repository.ProductoRepository;
 import com.openhtmltopdf.DOMBuilder;
@@ -25,6 +27,8 @@ import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PdfService {
@@ -32,7 +36,7 @@ public class PdfService {
 	@Autowired
 	private MaterialRepository materialRepository;
 	@Autowired
-	private ProductoRepository productoRepository;
+	private MaterialController materialController;
 	@Autowired
 	private ProductoController productoController;
 
@@ -51,7 +55,13 @@ public class PdfService {
 
 		Pdf pdf = null;
 		if (type.equals("Materiales")){
-			pdf = new Pdf(materialRepository.findByEmpresa_EmpresaIdAndActivoAndFechaCreacionBetweenOrderByNombre(usuarioDTO.getEmpresaId(), Boolean.TRUE, LocalDateTime.ofInstant(desde.toInstant(), ZoneId.systemDefault()), LocalDateTime.ofInstant(hasta.toInstant(), ZoneId.systemDefault())));
+			List<MaterialDTO> listMaterials =  materialRepository.findByEmpresa_EmpresaIdAndActivoAndFechaCreacionBetweenOrderByNombre(usuarioDTO.getEmpresaId(), Boolean.TRUE, LocalDateTime.ofInstant(desde.toInstant(), ZoneId.systemDefault()), LocalDateTime.ofInstant(hasta.toInstant(), ZoneId.systemDefault()))
+					.stream()
+					.map(ProductoMapper.INSTANCE::materialToMaterialDTO)
+					.collect(Collectors.toList());
+
+
+			pdf = new Pdf(materialController.doLogic(listMaterials, usuarioDTO));
 		}else if (type.equals("Productos")){
 			pdf = new Pdf(productoController.getAllProductsByMaterialIdWithUpdate(null, usuarioDTO.getEmpresaId(), false, desde, hasta));
 		}

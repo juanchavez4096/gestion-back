@@ -1,29 +1,5 @@
 package com.empresa.consumo.masivo.gestion.controller;
 
-import java.io.IOException;
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.empresa.consumo.masivo.gestion.DTO.LoginDTO;
 import com.empresa.consumo.masivo.gestion.DTO.RegisterDTO;
 import com.empresa.consumo.masivo.gestion.DTO.UserWithToken;
@@ -35,9 +11,28 @@ import com.empresa.consumo.masivo.gestion.data.entity.Usuario;
 import com.empresa.consumo.masivo.gestion.data.repository.UsuarioRepository;
 import com.empresa.consumo.masivo.gestion.exception.ImageNotFoundException;
 import com.empresa.consumo.masivo.gestion.exception.InvalidFileException;
+import com.empresa.consumo.masivo.gestion.exception.UsuarioException;
 import com.empresa.consumo.masivo.gestion.security.EncryptService;
 import com.empresa.consumo.masivo.gestion.security.JwtService;
 import com.empresa.consumo.masivo.gestion.service.UploadService;
+import com.empresa.consumo.masivo.gestion.service.UsuarioService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import java.io.IOException;
+import java.util.Optional;
 
 
 @RestController
@@ -54,6 +49,8 @@ public class UsuarioController {
     private JwtService jwtService;
 	@Autowired
 	private UploadService uploadService;
+	@Autowired
+	private UsuarioService usuarioService;
 	
 	@RequestMapping(value="login", method=RequestMethod.POST)
 	public ResponseEntity<UserWithToken> getUsuarioById(@Valid @RequestBody LoginDTO loginDTO) {
@@ -202,6 +199,30 @@ public class UsuarioController {
 
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
+
+	@RequestMapping(path = "forgotPassword", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<Boolean> forgotPassword(@RequestParam(value = "email") String email) throws UsuarioException {
+
+		boolean success = false;
+		success = usuarioService.generatePasswordCodeBase64(email);
+		return new ResponseEntity<>(success, HttpStatus.OK);
+
+	}
+
+	@RequestMapping(path = "changeForgottenPassword", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<Boolean> changeForgottenPassword(@RequestParam(value = "email") String email,
+														@RequestParam(value = "newPassword") String newPassword,
+														@RequestParam(value = "codigoVerificacion") String codigoVerificion) {
+
+		boolean success = false;
+
+		success = usuarioService.changeForgottenPassword(email, newPassword, codigoVerificion);
+
+
+		return new ResponseEntity<>(success, HttpStatus.OK);
+
+	}
+	
 	
 	
 }
