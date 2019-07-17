@@ -33,11 +33,11 @@ public class EmailService {
 			message.setSubject(titulo);
 			String content = build(usuario, codigoVerificacion, titulo);
 
-			MimeMailMessage mimeMailMessage = mailSender.createMimeMessage();
+			//MimeMailMessage mimeMailMessage = mailSender.createMimeMessage();
 
 			message.setText(content);
 
-			mailSender.send(message);
+			//mailSender.send(message);
 			log.info("An Email Notification was sent succesfully");
 		}).start();
 	}

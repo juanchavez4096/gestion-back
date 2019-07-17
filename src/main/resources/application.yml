@@ -34,10 +34,8 @@ spring:
     username:
 # Logger configuration
 logging:
-  pattern:
-    console: "%d %-5level %logger : %msg%n"
   level:
-    org.springframework: INFO
+    org.springframework: ERROR
     org.hibernate: off
 # Server configuration
 server:
@@ -56,12 +54,12 @@ file:
 
 
 
-  spring.mail.username=username
-  spring.mail.password=password
-  spring.mail.properties.mail.transport.protocol=smtp
-  spring.mail.properties.mail.smtp.port=25
-  spring.mail.properties.mail.smtp.auth=true
-  spring.mail.properties.mail.smtp.starttls.enable=true
-  spring.mail.properties.mail.smtp.starttls.required=true
+  ##spring.mail.username=username
+  ##spring.mail.password=password
+  ##spring.mail.properties.mail.transport.protocol=smtp
+  #spring.mail.properties.mail.smtp.port=25
+  #spring.mail.properties.mail.smtp.auth=true
+  #spring.mail.properties.mail.smtp.starttls.enable=true
+  #spring.mail.properties.mail.smtp.starttls.required=true*/
 
 
