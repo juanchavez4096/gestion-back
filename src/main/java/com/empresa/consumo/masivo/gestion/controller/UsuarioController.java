@@ -281,7 +281,6 @@ public class UsuarioController {
 		UsuarioDTO usuario = null;
 
 		usuario = UsuarioMapper.INSTANCE.usuarioToUsuarioDTOForDisplay(usuarioRepository.findByEmpresa_EmpresaIdAndUsuarioId(usuarioDTO.getEmpresaId(), usuarioId.intValue()));
-		
 		return new ResponseEntity<>(usuario, HttpStatus.OK);
 	}
 
