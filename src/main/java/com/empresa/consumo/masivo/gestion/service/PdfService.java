@@ -8,6 +8,7 @@ import com.empresa.consumo.masivo.gestion.controller.ProductoController;
 import com.empresa.consumo.masivo.gestion.convertor.ProductoMapper;
 import com.empresa.consumo.masivo.gestion.data.repository.MaterialRepository;
 import com.empresa.consumo.masivo.gestion.data.repository.ProductoRepository;
+import com.empresa.consumo.masivo.gestion.data.repository.UsuarioRepository;
 import com.openhtmltopdf.DOMBuilder;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
@@ -39,6 +40,8 @@ public class PdfService {
 	private MaterialController materialController;
 	@Autowired
 	private ProductoController productoController;
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -64,6 +67,8 @@ public class PdfService {
 			pdf = new Pdf(materialController.doLogic(listMaterials, usuarioDTO));
 		}else if (type.equals("Productos")){
 			pdf = new Pdf(productoController.getAllProductsByMaterialIdWithUpdate(null, usuarioDTO.getEmpresaId(), false, desde, hasta));
+		}else if (type.equals("Administración")){
+			pdf = new Pdf(usuarioRepository.findByEmpresa_EmpresaIdAndFechaCreacionBetweenIgnoreCaseOrderByNombre(usuarioDTO.getEmpresaId(), LocalDateTime.ofInstant(desde.toInstant(), ZoneId.systemDefault()), LocalDateTime.ofInstant(hasta.toInstant(), ZoneId.systemDefault())));
 		}
 
 		context.setVariable("titulo", type);

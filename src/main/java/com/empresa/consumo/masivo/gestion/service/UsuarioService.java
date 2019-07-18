@@ -10,9 +10,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.Random;
 
@@ -31,7 +37,7 @@ public class UsuarioService {
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public Boolean generatePasswordCodeBase64(String userEmail) throws UsuarioException {
+	public Boolean generatePasswordCodeBase64(String userEmail) throws UsuarioException, IOException {
 
 		Usuario user;
 		Boolean success = false;
@@ -41,6 +47,9 @@ public class UsuarioService {
 		Optional<Usuario> userObj = usuarioRepository.findByEmail(userEmail);
 
 		if (userObj.isPresent()) {
+
+
+
 			user = userObj.get();
 			String password = randomString();
 			encodedPassword = passwordEncoder.encode(password);

@@ -438,8 +438,6 @@ public class ProductoController {
 			 HttpServletRequest request) throws IllegalStateException, IOException,
 			 InvalidFileException {
 
-		
-		
 		if (!productoRepository.existsByProductoIdAndEmpresa_EmpresaId(Long.parseLong(productoId), usuarioDTO.getEmpresaId())) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}

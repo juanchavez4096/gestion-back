@@ -4,40 +4,53 @@ import com.empresa.consumo.masivo.gestion.data.entity.Usuario;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMailMessage;
-import org.springframework.stereotype.Component;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.util.Properties;
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 
-@Component
+@Service
 public class EmailService {
 	
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private TemplateEngine templateEngine;
-	/*@Autowired
-	private JavaMailSender javaMailSender;*/
+	@Autowired
+	private JavaMailSender javaMailSender;
+	@Value("${spring.mail.username}")
+	private String springMailUsername;
 
 	public void sendSimpleMessage(String[] to, Usuario usuario, String codigoVerificacion) {
 		new Thread(() -> {
 
-			SimpleMailMessage message = new SimpleMailMessage();
-			message.setTo(to);
-			String titulo = "Recuperacion de contraseña";
-			message.setSubject(titulo);
-			String content = build(usuario, codigoVerificacion, titulo);
+			MimeMessage messageToSend = javaMailSender.createMimeMessage();
+			MimeMessageHelper helper;
 
-			//MimeMailMessage mimeMailMessage = mailSender.createMimeMessage();
+			try {
+				helper = new MimeMessageHelper(messageToSend, true);
+				String strDomain = "recovery@gestioncostosoperativos";
+				helper.setFrom(new InternetAddress(springMailUsername, strDomain));
+				helper.setTo(to);
+				String title = "Recuperacion de contraseña";
+				helper.setSubject(title);
+				String content = build(usuario, codigoVerificacion,  title);
+				helper.setText(content, true);
+			} catch (MessagingException | UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
-			message.setText(content);
-
+			javaMailSender.send(messageToSend);
 			//mailSender.send(message);
+
 			log.info("An Email Notification was sent succesfully");
 		}).start();
 	}

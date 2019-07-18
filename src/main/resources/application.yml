@@ -31,7 +31,18 @@ spring:
       max-request-size: 10MB
   mail:
     host: smtp.gmail.com
-    username:
+    username: dragonax360@gmail.com
+    password: jgfijubjpbjgknbw
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          port: 587
+          auth: true
+          starttls:
+            enable: true
+            required: true
 # Logger configuration
 logging:
   level:
@@ -51,15 +62,5 @@ jwt:
 # All files uploaded through the REST API will be stored in this directory
 file: 
   upload-dir: /home/jchavez/uploads3
-
-
-
-  ##spring.mail.username=username
-  ##spring.mail.password=password
-  ##spring.mail.properties.mail.transport.protocol=smtp
-  #spring.mail.properties.mail.smtp.port=25
-  #spring.mail.properties.mail.smtp.auth=true
-  #spring.mail.properties.mail.smtp.starttls.enable=true
-  #spring.mail.properties.mail.smtp.starttls.required=true*/
 
 

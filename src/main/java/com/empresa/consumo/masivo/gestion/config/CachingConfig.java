@@ -16,9 +16,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 @Configuration
 @EnableCaching
 public class CachingConfig {
-	
-	
-	
 	@Bean
 	public CacheManager cacheManager() {
         CaffeineCacheManager caffeineCache = new CaffeineCacheManager("usuarioImageShort", "usuarioImageBig", "usuarioImageMed", "materialImageShort", "materialImageBig", "materialImageMed", "productoImageShort", "productoImageBig", "productoImageMed");

@@ -65,7 +65,7 @@
 			<tr>
 				<th>
 					<div>
-						Nombre del [[${titulo.equals("Productos") ? "Producto" : "Material"}]]
+						Nombre del [[${titulo.equals("Productos") ? "Producto" : (titulo.equals("Materiales") ? "Material" : "Usuario")}]]
 					</div>
 				</th>
 				<th th:if="${titulo.equals('Productos')}">
@@ -93,21 +93,37 @@
 						Precio de venta
 					</div>
 				</th>
-				<th th:unless="${titulo.equals('Productos')}">
+				<th th:if="${titulo.equals('Materiales')}">
 					<div>
 						Costo de Compra
 					</div>
 				</th>
-				<th th:unless="${titulo.equals('Productos')}">
+				<th th:if="${titulo.equals('Materiales')}">
 					<div>
 						Cantidad
 					</div>
 				</th>
-				<th th:unless="${titulo.equals('Productos')}">
+				<th th:if="${titulo.equals('Materiales')}">
 					<div>
 						Tipo de unidad
 					</div>
 				</th>
+				<th th:if="${titulo.equals('Administración')}">
+					<div>
+						Email
+					</div>
+				</th>
+				<th th:if="${titulo.equals('Administración')}">
+					<div>
+						Tipo de Usuario
+					</div>
+				</th>
+				<th>
+					<div>
+						Fecha de Creación
+					</div>
+				</th>
+
 			</tr>
 			<tr th:if="${titulo.equals('Productos')}" th:each="producto: ${pdf.list}">
 				<td>
@@ -140,8 +156,13 @@
 						[[${producto.precioVenta}]]Bs
 					</div>
 				</td>
+				<td>
+					<div>
+						[[${#temporals.format(producto.fechaCreacion, 'MM/dd/yyyy hh:mm a')}]]
+					</div>
+				</td>
 			</tr>
-			<tr th:unless="${titulo.equals('Productos')}" th:each="material: ${pdf.list}">
+			<tr th:if="${titulo.equals('Materiales')}" th:each="material: ${pdf.list}">
 				<td>
 					<div>
 						[[${material.nombre}]]
@@ -160,6 +181,33 @@
 				<td>
 					<div>
 						[[${material.tipoUnidad.tipo}]]
+					</div>
+				</td>
+				<td>
+					<div>
+						[[${#temporals.format(material.fechaCreacion, 'MM/dd/yyyy hh:mm a')}]]
+					</div>
+				</td>
+			</tr>
+			<tr th:if="${titulo.equals('Administración')}" th:each="usuario: ${pdf.list}">
+				<td>
+					<div>
+						[[${usuario.nombre}]]
+					</div>
+				</td>
+				<td>
+					<div>
+						[[${usuario.email}]]Bs
+					</div>
+				</td>
+				<td>
+					<div>
+						[[${usuario.tipoUsuario.tipo}]]
+					</div>
+				</td>
+				<td>
+					<div>
+						[[${#temporals.format(usuario.fechaCreacion, 'MM/dd/yyyy hh:mm a')}]]
 					</div>
 				</td>
 			</tr>

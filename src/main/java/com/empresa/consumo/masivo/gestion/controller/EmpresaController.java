@@ -1,6 +1,8 @@
 package com.empresa.consumo.masivo.gestion.controller;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -97,7 +99,7 @@ public class EmpresaController {
 		createEmpresa.setEnabled(Boolean.TRUE);
 		empresaRepository.save(createEmpresa);
 		String generatedPassword = RandomStringUtils.randomAlphanumeric(10);
-		usuarioRepository.save(new Usuario( createEmpresa, new TipoUsuario(UsuarioTypesConstants.USUARIO), registerEmpresaDTO.getNombre(), registerEmpresaDTO.getEmail(),encryptService.encrypt(generatedPassword) ));
+		usuarioRepository.save(new Usuario( createEmpresa, new TipoUsuario(UsuarioTypesConstants.USUARIO), registerEmpresaDTO.getNombre(), registerEmpresaDTO.getEmail(),encryptService.encrypt(generatedPassword), Boolean.TRUE, LocalDateTime.now(ZoneId.systemDefault()) ));
 
 
 		return new ResponseEntity<>(new ResultEmpresaDTO(registerEmpresaDTO.getNombreEmpresa(), registerEmpresaDTO.getNombre(), registerEmpresaDTO.getEmail(), generatedPassword), HttpStatus.CREATED);
@@ -192,7 +194,7 @@ public class EmpresaController {
 		return new ResponseEntity<>(fileName, HttpStatus.OK);
 	}
 
-	/*@RequestMapping(path = "file/download", method = RequestMethod.GET)
+	@RequestMapping(path = "file/download", method = RequestMethod.GET)
 	public ResponseEntity<byte[]> downloadAttachment(@RequestParam("token") String token, @RequestParam("size") String size, HttpServletRequest request,
 			HttpServletResponse response) throws IllegalStateException, IOException,
 			InvalidFileException, ImageNotFoundException {
@@ -221,7 +223,7 @@ public class EmpresaController {
 			return uploadService.downloadUserImageMed(Long.parseLong(userId.get()), request, response);
 		}
 
-	}*/
+	}
 
 	@RequestMapping(path = "file/delete", method = RequestMethod.DELETE)
 	public ResponseEntity<Long> deleteFile(@AuthenticationPrincipal UsuarioDTO usuarioDTO,

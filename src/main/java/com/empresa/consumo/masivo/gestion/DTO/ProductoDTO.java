@@ -7,6 +7,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -23,6 +24,7 @@ public class ProductoDTO implements Serializable {
 	private String ganancia;
 	private Double depreciacion;
 	private String precioVentaDolares;
+	private LocalDateTime fechaCreacion;
 	
 	public ProductoDTO() {
 		super();

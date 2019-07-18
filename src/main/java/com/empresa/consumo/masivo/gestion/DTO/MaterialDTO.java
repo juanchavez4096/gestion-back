@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 
 @Getter
@@ -22,6 +23,7 @@ public class MaterialDTO implements java.io.Serializable {
 	private Double costo;
 	@NotNull
 	private Double cantidadCompra;
+	private LocalDateTime fechaCreacion;
 
 	public MaterialDTO() {
 	}

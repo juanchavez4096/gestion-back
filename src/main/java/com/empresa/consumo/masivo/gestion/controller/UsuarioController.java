@@ -1,14 +1,14 @@
 package com.empresa.consumo.masivo.gestion.controller;
 
-import com.empresa.consumo.masivo.gestion.DTO.LoginDTO;
-import com.empresa.consumo.masivo.gestion.DTO.RegisterDTO;
-import com.empresa.consumo.masivo.gestion.DTO.UserWithToken;
-import com.empresa.consumo.masivo.gestion.DTO.UsuarioDTO;
+import com.empresa.consumo.masivo.gestion.DTO.*;
+import com.empresa.consumo.masivo.gestion.convertor.ProductoMapper;
 import com.empresa.consumo.masivo.gestion.convertor.UsuarioMapper;
 import com.empresa.consumo.masivo.gestion.data.entity.Empresa;
+import com.empresa.consumo.masivo.gestion.data.entity.Producto;
 import com.empresa.consumo.masivo.gestion.data.entity.TipoUsuario;
 import com.empresa.consumo.masivo.gestion.data.entity.Usuario;
 import com.empresa.consumo.masivo.gestion.data.repository.UsuarioRepository;
+import com.empresa.consumo.masivo.gestion.exception.BusinessServiceException;
 import com.empresa.consumo.masivo.gestion.exception.ImageNotFoundException;
 import com.empresa.consumo.masivo.gestion.exception.InvalidFileException;
 import com.empresa.consumo.masivo.gestion.exception.UsuarioException;
@@ -19,10 +19,15 @@ import com.empresa.consumo.masivo.gestion.service.UsuarioService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +37,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 
@@ -100,23 +107,6 @@ public class UsuarioController {
 		UsuarioDTO newUsuarioDTO = UsuarioMapper.INSTANCE.usuarioToUsuarioDTO(newUsuario);
 		return new ResponseEntity<>(new UserWithToken(newUsuarioDTO, jwtService.toToken(newUsuarioDTO)) , HttpStatus.CREATED);
 	}
-	
-	/*@RequestMapping(value="forgotPassword", method=RequestMethod.POST)
-	public ResponseEntity<UserWithToken> getUsuarioById(@Valid @RequestBody LoginDTO loginDTO) {
-		UsuarioDTO usuarioDTO =  UsuarioMapper.INSTANCE
-									.usuarioToUsuarioDTO(usuarioRepository.findByEmail(loginDTO.getEmail()));
-		if (usuarioDTO == null) {
-			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-		}else {
-			if (encryptService.check(loginDTO.getPassword(), usuarioDTO.getPassword())) {
-				return new ResponseEntity<>(new UserWithToken(usuarioDTO, jwtService.toToken(usuarioDTO)), HttpStatus.OK);
-			}else {
-				return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-			}
-			
-		}
-		
-	}*/
 
 	@RequestMapping(value="changePassword", method=RequestMethod.POST)
 	public ResponseEntity<Void> changePassword(@NotEmpty @RequestParam(value = "currentPassword") String currentPassword, @NotEmpty @RequestParam(value = "newPassword") String newPassword, @AuthenticationPrincipal UsuarioDTO usuarioDTO) {
@@ -131,7 +121,6 @@ public class UsuarioController {
 			return new ResponseEntity<>(HttpStatus.CONFLICT);
 		}
 	}
-	
 	
 
 	@RequestMapping(path = "file/upload", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -162,7 +151,7 @@ public class UsuarioController {
 	}
 
 	@RequestMapping(path = "file/download", method = RequestMethod.GET)
-	public ResponseEntity<byte[]> downloadAttachment(@RequestParam("token") String token, @RequestParam("size") String size, HttpServletRequest request,
+	public ResponseEntity<byte[]> downloadAttachment(@RequestParam("token") String token, @RequestParam("usuarioId") Long usuarioId, @RequestParam("size") String size, HttpServletRequest request,
 			HttpServletResponse response) throws IllegalStateException, IOException,
 			InvalidFileException, ImageNotFoundException {
 
@@ -182,11 +171,11 @@ public class UsuarioController {
 
 		log.info("Donwload in controller");
 		if (size.equals("50x50")) {
-			return uploadService.downloadUserImageShort(Long.parseLong(userId.get()), request, response);
+			return uploadService.downloadUserImageShort(usuarioId, request, response);
 		} else if (size.equals("500x500")) {
-			return uploadService.downloadUserImageBig(Long.parseLong(userId.get()), request, response);
+			return uploadService.downloadUserImageBig(usuarioId, request, response);
 		} else {
-			return uploadService.downloadUserImageMed(Long.parseLong(userId.get()), request, response);
+			return uploadService.downloadUserImageMed(usuarioId, request, response);
 		}
 
 	}
@@ -201,7 +190,7 @@ public class UsuarioController {
 	}
 
 	@RequestMapping(path = "forgotPassword", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<Boolean> forgotPassword(@RequestParam(value = "email") String email) throws UsuarioException {
+	public ResponseEntity<Boolean> forgotPassword(@RequestParam(value = "email") String email) throws UsuarioException, IOException {
 
 		boolean success = false;
 		success = usuarioService.generatePasswordCodeBase64(email);
@@ -209,18 +198,109 @@ public class UsuarioController {
 
 	}
 
-	@RequestMapping(path = "changeForgottenPassword", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(path = "changeForgottenPassword", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<Boolean> changeForgottenPassword(@RequestParam(value = "email") String email,
-														@RequestParam(value = "newPassword") String newPassword,
+														@RequestParam(value = "password") String password,
 														@RequestParam(value = "codigoVerificacion") String codigoVerificion) throws UsuarioException {
 
 		boolean success = false;
-
-		success = usuarioService.changeForgottenPassword(email, newPassword, codigoVerificion);
+		success = usuarioService.changeForgottenPassword(email, password, codigoVerificion);
 		return new ResponseEntity<>(success, HttpStatus.OK);
-
 	}
-	
-	
-	
+
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, readOnly = false, rollbackFor = {
+			Exception.class })
+	@RequestMapping(value = "add", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<?> addUsuario(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @RequestParam(value = "nombre") String nombre, @RequestParam(value = "email") String email,
+										@RequestParam(value = "tipoUsuario") Long tipoUsuario,
+										@RequestParam(value = "imagen", required = false) MultipartFile file) throws IOException, BusinessServiceException {
+
+		if (usuarioDTO.getEmpresaId() == null) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		if (nombre == null || nombre.isEmpty()){
+			throw new BusinessServiceException();
+		}
+
+		if (file != null) {
+			ResponseEntity<String> responseEntity = this.validateFile(file);
+			if (responseEntity != null ) {
+				return responseEntity;
+			}
+		}
+		if (usuarioRepository.existsByEmail(email)){
+			throw new UsuarioException("La dirección de email ya se encuentra utilizada por un usuario.");
+		}
+
+		UsuarioDTO savedUser = UsuarioMapper.INSTANCE.usuarioToUsuarioDTO(usuarioRepository.save(new Usuario(new Empresa(usuarioDTO.getEmpresaId()), new TipoUsuario(tipoUsuario.intValue()), nombre, email, encryptService.encrypt("password"), Boolean.TRUE, LocalDateTime.now(ZoneId.systemDefault()) ))) ;
+		if (file != null) {
+			String fileName = uploadService.uploadUserImage(file, savedUser.getUsuarioId());
+		}
+
+
+		return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+	}
+
+	private ResponseEntity<String> validateFile(MultipartFile file) {
+		if (file.isEmpty())
+			return new ResponseEntity<>("The File cannot be empty", HttpStatus.NOT_ACCEPTABLE);
+
+		if (!file.getContentType().equals(MimeTypeUtils.IMAGE_JPEG_VALUE)
+				&& !file.getContentType().equals(MimeTypeUtils.IMAGE_PNG_VALUE))
+			return new ResponseEntity<>("Invalid File Content Type", HttpStatus.NOT_ACCEPTABLE);
+
+		if (file.getSize() > 2000000)
+			return new ResponseEntity<>("Invalid File Content size: greater than 2MB", HttpStatus.NOT_ACCEPTABLE);
+
+		if (file.getName().length() > 100)
+			return new ResponseEntity<>("Invalid File Content name: name length greater than 100",
+					HttpStatus.NOT_ACCEPTABLE);
+		return null;
+	}
+
+	@RequestMapping(value="all", method = RequestMethod.GET)
+	public ResponseEntity<Page<UsuarioDTO>> getAllUsers(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @RequestParam(value = "search", required = false, defaultValue = "") String search, Pageable pageable) {
+
+		if (usuarioDTO.getEmpresaId() == null) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		Page<UsuarioDTO> pageUsuarios = null;
+
+		pageUsuarios = usuarioRepository.findByEmpresa_EmpresaIdAndNombreContainingIgnoreCaseOrderByNombre(usuarioDTO.getEmpresaId(), search, pageable)
+				.map(UsuarioMapper.INSTANCE::usuarioToUsuarioDTOForDisplay);
+
+		return new ResponseEntity<>(pageUsuarios, HttpStatus.OK);
+	}
+
+	@RequestMapping(value="byId", method = RequestMethod.GET)
+	public ResponseEntity<UsuarioDTO> getUser(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @RequestParam(value = "usuarioId") Long usuarioId) {
+
+		if (usuarioDTO.getEmpresaId() == null) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		UsuarioDTO usuario = null;
+
+		usuario = UsuarioMapper.INSTANCE.usuarioToUsuarioDTOForDisplay(usuarioRepository.findByEmpresa_EmpresaIdAndUsuarioId(usuarioDTO.getEmpresaId(), usuarioId.intValue()));
+		
+		return new ResponseEntity<>(usuario, HttpStatus.OK);
+	}
+
+	@RequestMapping(value="changeStatus", method = RequestMethod.GET)
+	public ResponseEntity<Void> changeStatus(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @RequestParam(value = "usuarioId") Long usuarioId) throws UsuarioException {
+
+		if (usuarioDTO.getEmpresaId() == null) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		if (usuarioId.longValue() == usuarioDTO.getUsuarioId().longValue()){
+			throw new UsuarioException("No puede cambiar su propio estado.");
+		}
+
+		usuarioRepository.findById(usuarioId.intValue()).ifPresent(u -> {
+			u.setEnabled(!u.getEnabled());
+			usuarioRepository.save(u);
+		});
+
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
 }
