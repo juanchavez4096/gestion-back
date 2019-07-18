@@ -87,8 +87,6 @@ public class UsuarioController {
 		return new ResponseEntity<>(usuarioDTO, HttpStatus.OK);
 	}
 
-
-	
 	@RequestMapping(value="register", method=RequestMethod.POST)
 	public ResponseEntity<?> register(@Valid @RequestBody RegisterDTO registerDTO, @AuthenticationPrincipal UsuarioDTO usuarioDTO) {
 		
@@ -121,7 +119,6 @@ public class UsuarioController {
 			return new ResponseEntity<>(HttpStatus.CONFLICT);
 		}
 	}
-	
 
 	@RequestMapping(path = "file/upload", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UsuarioDTO usuarioDTO)
@@ -236,7 +233,6 @@ public class UsuarioController {
 		if (file != null) {
 			String fileName = uploadService.uploadUserImage(file, savedUser.getUsuarioId());
 		}
-
 
 		return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
 	}

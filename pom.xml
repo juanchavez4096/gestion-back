@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>com.empresa.consumo.masivo</groupId>
 	<artifactId>gestion</artifactId>
-	<version>0.0.3</version>
+	<version>1.0.0</version>
 	<name>gestion</name>
 	<description>Aplicación Informática para la gestión de costos operativos de una empresa de consumo masivo</description>
 
