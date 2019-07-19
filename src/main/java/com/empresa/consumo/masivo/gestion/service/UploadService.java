@@ -57,23 +57,20 @@ public class UploadService {
 		}
 	}
 
-	@Caching(evict = { @CacheEvict(value = "usuarioImageShort", key = "{#userId}", condition = "#result!=null"),
-			@CacheEvict(value = "usuarioImageShort", key = "{#userId}", condition = "#result!=null"),
-			@CacheEvict(value = "usuarioImageShort", key = "{#userId}", condition = "#result!=null") })
 	public String uploadUserImage(MultipartFile file, Long userId) throws IllegalStateException, IOException {
 		return upload(file, userId, FOLDER_USER);
 	}
 
-	@Caching(evict = { @CacheEvict(value = "materialImageShort", key = "{#materialId}", condition = "#result!=null"),
+	/*@Caching(evict = { @CacheEvict(value = "materialImageShort", key = "{#materialId}", condition = "#result!=null"),
 			@CacheEvict(value = "materialImageBig", key = "{#materialId}", condition = "#result!=null"),
-			@CacheEvict(value = "materialImageMed", key = "{#materialId}", condition = "#result!=null") })
+			@CacheEvict(value = "materialImageMed", key = "{#materialId}", condition = "#result!=null") })*/
 	public String uploadMaterialImage(MultipartFile file, Long materialId) throws IllegalStateException, IOException {
 		return upload(file, materialId, FOLDER_MATERIAL);
 	}
 
-	@Caching(evict = { @CacheEvict(value = "productoImageShort", key = "{#productoId}", condition = "#result!=null"),
+	/*@Caching(evict = { @CacheEvict(value = "productoImageShort", key = "{#productoId}", condition = "#result!=null"),
 			@CacheEvict(value = "productoImageBig", key = "{#productoId}", condition = "#result!=null"),
-			@CacheEvict(value = "productoImageMed", key = "{#productoId}", condition = "#result!=null") })
+			@CacheEvict(value = "productoImageMed", key = "{#productoId}", condition = "#result!=null") })*/
 	public String uploadProductoImage(MultipartFile file, Long productoId) throws IllegalStateException, IOException {
 		return upload(file, productoId, FOLDER_PRODUCTO);
 	}
@@ -113,21 +110,21 @@ public class UploadService {
 	}
 
 	// USUARIO DOWNLOAD IMAGE
-	@Cacheable(value = "usuarioImageShort", key = "{#userId}", unless = "#result == null")
+	//@Cacheable(value = "usuarioImageShort", key = "{#userId}", unless = "#result == null")
 	public ResponseEntity<byte[]> downloadUserImageShort(Long userId, HttpServletRequest request,
 			HttpServletResponse response) throws ImageNotFoundException, IOException {
 		String fileName = "50x50.png";
 		return this.downloadImage(userId, fileName, FOLDER_USER, request, response);
 	}
 
-	@Cacheable(value = "usuarioImageBig", key = "{#userId}", unless = "#result == null")
+	//@Cacheable(value = "usuarioImageBig", key = "{#userId}", unless = "#result == null")
 	public ResponseEntity<byte[]> downloadUserImageBig(Long userId, HttpServletRequest request,
 			HttpServletResponse response) throws ImageNotFoundException, IOException {
 		String fileName = "500x500.png";
 		return this.downloadImage(userId, fileName, FOLDER_USER, request, response);
 	}
 
-	@Cacheable(value = "usuarioImageMed", key = "{#userId}", unless = "#result == null")
+	//@Cacheable(value = "usuarioImageMed", key = "{#userId}", unless = "#result == null")
 	public ResponseEntity<byte[]> downloadUserImageMed(Long userId, HttpServletRequest request,
 			HttpServletResponse response) throws ImageNotFoundException, IOException {
 		String fileName = "128x128.png";
@@ -135,21 +132,21 @@ public class UploadService {
 	}
 
 	// MATERIAL DOWNLOAD IMAGE
-	@Cacheable(value = "materialImageShort", key = "{#materialId}", unless = "#result == null")
+	//@Cacheable(value = "materialImageShort", key = "{#materialId}", unless = "#result == null")
 	public ResponseEntity<byte[]> downloadMaterialImageShort(Long materialId, HttpServletRequest request,
 			HttpServletResponse response) throws ImageNotFoundException, IOException {
 		String fileName = "50x50.png";
 		return this.downloadImage(materialId, fileName, FOLDER_MATERIAL, request, response);
 	}
 
-	@Cacheable(value = "materialImageBig", key = "{#materialId}", unless = "#result == null")
+	//@Cacheable(value = "materialImageBig", key = "{#materialId}", unless = "#result == null")
 	public ResponseEntity<byte[]> downloadMaterialImageBig(Long materialId, HttpServletRequest request,
 			HttpServletResponse response) throws ImageNotFoundException, IOException {
 		String fileName = "500x500.png";
 		return this.downloadImage(materialId, fileName, FOLDER_MATERIAL, request, response);
 	}
 
-	@Cacheable(value = "materialImageMed", key = "{#materialId}", unless = "#result == null")
+	//Cacheable(value = "materialImageMed", key = "{#materialId}", unless = "#result == null")
 	public ResponseEntity<byte[]> downloadMaterialImageMed(Long materialId, HttpServletRequest request,
 			HttpServletResponse response) throws ImageNotFoundException, IOException {
 		String fileName = "128x128.png";
@@ -157,21 +154,21 @@ public class UploadService {
 	}
 
 	// PRODUCTO DOWNLOAD IMAGE
-	@Cacheable(value = "productoImageShort", key = "{#productoId}", unless = "#result == null")
+	//@Cacheable(value = "productoImageShort", key = "{#productoId}", unless = "#result == null")
 	public ResponseEntity<byte[]> downloadProductoImageShort(Long productoId, HttpServletRequest request,
 			HttpServletResponse response) throws ImageNotFoundException, IOException {
 		String fileName = "50x50.png";
 		return this.downloadImage(productoId, fileName, FOLDER_PRODUCTO, request, response);
 	}
 
-	@Cacheable(value = "productoImageBig", key = "{#productoId}", unless = "#result == null")
+	//@Cacheable(value = "productoImageBig", key = "{#productoId}", unless = "#result == null")
 	public ResponseEntity<byte[]> downloadProductoImageBig(Long productoId, HttpServletRequest request,
 			HttpServletResponse response) throws ImageNotFoundException, IOException {
 		String fileName = "500x500.png";
 		return this.downloadImage(productoId, fileName, FOLDER_PRODUCTO, request, response);
 	}
 
-	@Cacheable(value = "productoImageMed", key = "{#productoId}", unless = "#result == null")
+	//@Cacheable(value = "productoImageMed", key = "{#productoId}", unless = "#result == null")
 	public ResponseEntity<byte[]> downloadProductoImageMed(Long productoId, HttpServletRequest request,
 			HttpServletResponse response) throws ImageNotFoundException, IOException {
 		String fileName = "128x128.png";
@@ -222,23 +219,23 @@ public class UploadService {
 
 	}
 
-	@Caching(evict = { @CacheEvict(value = "usuarioImageShort", key = "{#userId}", condition = "#result!=null"),
+	/*@Caching(evict = { @CacheEvict(value = "usuarioImageShort", key = "{#userId}", condition = "#result!=null"),
 			@CacheEvict(value = "usuarioImageBig", key = "{#userId}", condition = "#result!=null"),
-			@CacheEvict(value = "usuarioImageMed", key = "{#userId}", condition = "#result!=null") })
+			@CacheEvict(value = "usuarioImageMed", key = "{#userId}", condition = "#result!=null") })*/
 	public Long deleteUserImage(Long userId) {
 		return deleteImage(userId, FOLDER_USER);
 	}
 	
-	@Caching(evict = { @CacheEvict(value = "materialImageShort", key = "{#materialId}", condition = "#result!=null"),
+	/*@Caching(evict = { @CacheEvict(value = "materialImageShort", key = "{#materialId}", condition = "#result!=null"),
 			@CacheEvict(value = "materialImageBig", key = "{#materialId}", condition = "#result!=null"),
-			@CacheEvict(value = "materialImageMed", key = "{#materialId}", condition = "#result!=null") })
+			@CacheEvict(value = "materialImageMed", key = "{#materialId}", condition = "#result!=null") })*/
 	public Long deleteMaterialImage(Long materialId) {
 		return deleteImage(materialId, FOLDER_MATERIAL);
 	}
 	
-	@Caching(evict = { @CacheEvict(value = "productoImageShort", key = "{#productoId}", condition = "#result!=null"),
+	/*@Caching(evict = { @CacheEvict(value = "productoImageShort", key = "{#productoId}", condition = "#result!=null"),
 			@CacheEvict(value = "productoImageBig", key = "{#productoId}", condition = "#result!=null"),
-			@CacheEvict(value = "productoImageMed", key = "{#productoId}", condition = "#result!=null") })
+			@CacheEvict(value = "productoImageMed", key = "{#productoId}", condition = "#result!=null") })*/
 	public Long deleteProductoImage(Long productoId) {
 		return deleteImage(productoId, FOLDER_PRODUCTO);
 	}

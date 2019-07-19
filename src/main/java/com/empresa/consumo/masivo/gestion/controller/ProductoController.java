@@ -379,7 +379,7 @@ public class ProductoController {
 	}
 	
 	@RequestMapping(path = "file/upload", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file,
+	public ResponseEntity<Void> uploadAttachment(@RequestParam("file") MultipartFile file,
 			 @RequestParam("productoId") String productoId, @AuthenticationPrincipal UsuarioDTO usuarioDTO)
 			throws IllegalStateException, IOException {
 		
@@ -388,16 +388,16 @@ public class ProductoController {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 		
-		ResponseEntity<String> responseEntity = this.validateFile(file);
+		/*ResponseEntity<Void> responseEntity = this.validateFile(file);
 		if (responseEntity != null ) {
 			return responseEntity;
-		}
+		}*/
 		
 		String fileName = uploadService.uploadProductoImage(file, Long.parseLong(productoId));
 
 		log.info("Image uploaded with userId " + usuarioDTO.getUsuarioId());
 
-		return new ResponseEntity<>(fileName, HttpStatus.OK);
+		return new ResponseEntity<>( HttpStatus.OK);
 	}
 
 	@RequestMapping(path = "file/download", method = RequestMethod.GET)
@@ -437,18 +437,18 @@ public class ProductoController {
 	}
 
 	@RequestMapping(path = "file/delete", method = RequestMethod.DELETE)
-	public ResponseEntity<Long> deleteFile(@RequestParam("productoId") String productoId, @AuthenticationPrincipal UsuarioDTO usuarioDTO,
+	public ResponseEntity<Void> deleteFile(@RequestParam("productoId") Long productoId, @AuthenticationPrincipal UsuarioDTO usuarioDTO,
 			 HttpServletRequest request) throws IllegalStateException, IOException,
 			 InvalidFileException {
 
-		if (!productoRepository.existsByProductoIdAndEmpresa_EmpresaId(Long.parseLong(productoId), usuarioDTO.getEmpresaId())) {
+		if (!productoRepository.existsByProductoIdAndEmpresa_EmpresaId(productoId, usuarioDTO.getEmpresaId())) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 
-		Long result = uploadService.deleteProductoImage(Long.parseLong(productoId));
+		uploadService.deleteProductoImage(productoId);
 		log.info("Image Deleted by userId: " + usuarioDTO.getUsuarioId());
 
-		return new ResponseEntity<>(result, HttpStatus.OK);
+		return new ResponseEntity<>( HttpStatus.OK);
 	}
 	
 	private ResponseEntity<String> validateFile(MultipartFile file) {

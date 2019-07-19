@@ -120,22 +120,22 @@ public class UsuarioController {
 	}
 
 	@RequestMapping(path = "file/upload", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UsuarioDTO usuarioDTO)
+	public ResponseEntity<Void> uploadAttachment(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UsuarioDTO usuarioDTO)
 			throws IllegalStateException, IOException {
 
 		
 		if (file.isEmpty())
-			return new ResponseEntity<>("The File cannot be empty", HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>( HttpStatus.NOT_ACCEPTABLE);
 
 		if (!file.getContentType().equals(MimeTypeUtils.IMAGE_JPEG_VALUE)
 				&& !file.getContentType().equals(MimeTypeUtils.IMAGE_PNG_VALUE))
-			return new ResponseEntity<>("Invalid File Content Type", HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>( HttpStatus.NOT_ACCEPTABLE);
 
 		if (file.getSize() > 2000000)
-			return new ResponseEntity<>("Invalid File Content size: greater than 2MB", HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>( HttpStatus.NOT_ACCEPTABLE);
 
 		if (file.getName().length() > 100)
-			return new ResponseEntity<>("Invalid File Content name: name length greater than 100",
+			return new ResponseEntity<>(
 					HttpStatus.NOT_ACCEPTABLE);
 
 		
@@ -143,7 +143,7 @@ public class UsuarioController {
 
 		log.info("Image uploaded with userId " + usuarioDTO.getUsuarioId());
 
-		return new ResponseEntity<>(fileName, HttpStatus.OK);
+		return new ResponseEntity<>( HttpStatus.OK);
 	}
 
 	@RequestMapping(path = "file/download", method = RequestMethod.GET)
@@ -177,12 +177,12 @@ public class UsuarioController {
 	}
 
 	@RequestMapping(path = "file/delete", method = RequestMethod.DELETE)
-	public ResponseEntity<Long> deleteFile(@AuthenticationPrincipal UsuarioDTO usuarioDTO) throws IllegalStateException {
+	public ResponseEntity<Void> deleteFile(@AuthenticationPrincipal UsuarioDTO usuarioDTO) throws IllegalStateException {
 
 		Long result = uploadService.deleteUserImage(usuarioDTO.getUsuarioId() );
 		log.info("Image Deleted by userId: " + usuarioDTO.getUsuarioId());
 
-		return new ResponseEntity<>(result, HttpStatus.OK);
+		return new ResponseEntity<>( HttpStatus.OK);
 	}
 
 	@RequestMapping(path = "forgotPassword", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

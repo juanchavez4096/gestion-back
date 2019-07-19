@@ -271,7 +271,7 @@ public class MaterialController {
 	}
 
 	@RequestMapping(path = "file/upload", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file,
+	public ResponseEntity<Void> uploadAttachment(@RequestParam("file") MultipartFile file,
 			 @RequestParam("materialId") String materialId, @AuthenticationPrincipal UsuarioDTO usuarioDTO)
 			throws IllegalStateException, IOException {
 		
@@ -281,25 +281,24 @@ public class MaterialController {
 		}
 		
 		if (file.isEmpty())
-			return new ResponseEntity<>("The File cannot be empty", HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>( HttpStatus.NOT_ACCEPTABLE);
 
 		if (!file.getContentType().equals(MimeTypeUtils.IMAGE_JPEG_VALUE)
 				&& !file.getContentType().equals(MimeTypeUtils.IMAGE_PNG_VALUE))
-			return new ResponseEntity<>("Invalid File Content Type", HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>( HttpStatus.NOT_ACCEPTABLE);
 
 		if (file.getSize() > 2000000)
-			return new ResponseEntity<>("Invalid File Content size: greater than 2MB", HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>( HttpStatus.NOT_ACCEPTABLE);
 
 		if (file.getName().length() > 100)
-			return new ResponseEntity<>("Invalid File Content name: name length greater than 100",
-					HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 
 		
 		String fileName = uploadService.uploadMaterialImage(file, Long.parseLong(materialId));
 
 		log.info("Image uploaded with userId " + usuarioDTO.getUsuarioId());
 
-		return new ResponseEntity<>(fileName, HttpStatus.OK);
+		return new ResponseEntity<>( HttpStatus.OK);
 	}
 
 	@RequestMapping(path = "file/download", method = RequestMethod.GET)
@@ -338,7 +337,7 @@ public class MaterialController {
 	}
 
 	@RequestMapping(path = "file/delete", method = RequestMethod.DELETE)
-	public ResponseEntity<Long> deleteFile(@RequestParam("materialId") String materialId, @AuthenticationPrincipal UsuarioDTO usuarioDTO,
+	public ResponseEntity<Void> deleteFile(@RequestParam("materialId") String materialId, @AuthenticationPrincipal UsuarioDTO usuarioDTO,
 			 HttpServletRequest request) throws IllegalStateException{
 
 		if (!materialRepository.existsByMaterialIdAndEmpresa_EmpresaId(Long.parseLong(materialId), usuarioDTO.getEmpresaId())) {
@@ -348,7 +347,7 @@ public class MaterialController {
 		Long result = uploadService.deleteMaterialImage(Long.parseLong(materialId));
 		log.info("Image Deleted by userId: " + usuarioDTO.getUsuarioId());
 
-		return new ResponseEntity<>(result, HttpStatus.OK);
+		return new ResponseEntity<>( HttpStatus.OK);
 	}
 	
 }
