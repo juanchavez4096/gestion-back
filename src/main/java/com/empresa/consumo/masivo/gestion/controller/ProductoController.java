@@ -326,7 +326,7 @@ public class ProductoController {
 			}
 		}
 
-		ProductoDTO savedProducto = ProductoMapper.INSTANCE.productoToProductoDTO(productoRepository.save(new Producto(new Empresa(usuarioDTO.getEmpresaId()), nombre.trim(), 0d, LocalDateTime.now(ZoneId.systemDefault()) ))) ;
+		ProductoDTO savedProducto = ProductoMapper.INSTANCE.productoToProductoDTO(productoRepository.save(new Producto(new Empresa(usuarioDTO.getEmpresaId()), nombre.trim(), 0d, LocalDateTime.now(ZoneId.systemDefault()), new Usuario(usuarioDTO.getUsuarioId()), LocalDateTime.now(ZoneId.systemDefault()), new Usuario(usuarioDTO.getUsuarioId()) ))) ;
 		if (file != null) {
 			String fileName = uploadService.uploadProductoImage(file, savedProducto.getProductoId());
 		}
@@ -348,6 +348,9 @@ public class ProductoController {
 		if (producto.getEmpresa().getEmpresaId().longValue() == usuarioDTO.getEmpresaId().longValue()) {
 			producto.setNombre(productoDTO.getNombre().trim());
 			producto.setDepreciacion(productoDTO.getDepreciacion());
+			producto.setFechaActualizacion(LocalDateTime.now(ZoneId.systemDefault()));
+			producto.setActualizadoPor(new Usuario(usuarioDTO.getUsuarioId()));
+
 			productoRepository.save(producto);
 			this.getAllProductsByMaterialIdWithUpdate(producto.getProductoId(), usuarioDTO.getEmpresaId(),true, null, null);
 			return new ResponseEntity<>(HttpStatus.OK);
@@ -406,7 +409,7 @@ public class ProductoController {
 		if (!userId.isPresent()) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
-		Optional<Usuario> usuario = usuarioRepository.findById(Integer.parseInt(userId.get()));
+		Optional<Usuario> usuario = usuarioRepository.findById(Long.parseLong(userId.get()));
 		if(!usuario.isPresent()) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}

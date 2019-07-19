@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface UsuarioRepository extends CrudRepository<Usuario, Integer> {
+public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
 
 	Usuario findByEmailAndEnabledAndEmpresa_Enabled(String email, Boolean enabled, Boolean empresaEnabled);
 	Boolean existsByEmail(String email);
 	Optional<Usuario> findByEmail(String email);
 	Page<Usuario> findByEmpresa_EmpresaIdAndNombreContainingIgnoreCaseOrderByNombre(Long empresaId, String nombre, Pageable pageable);
 	List<Usuario> findByEmpresa_EmpresaIdAndFechaCreacionBetweenIgnoreCaseOrderByNombre(Long empresaId, LocalDateTime desde, LocalDateTime hasta);
-	Usuario findByEmpresa_EmpresaIdAndUsuarioId(Long empresaId, Integer usuarioId);
+	Usuario findByEmpresa_EmpresaIdAndUsuarioId(Long empresaId, Long usuarioId);
 }

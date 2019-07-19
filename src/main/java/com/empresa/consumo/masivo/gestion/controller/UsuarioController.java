@@ -2,9 +2,8 @@ package com.empresa.consumo.masivo.gestion.controller;
 
 import com.empresa.consumo.masivo.gestion.DTO.*;
 import com.empresa.consumo.masivo.gestion.convertor.ProductoMapper;
-import com.empresa.consumo.masivo.gestion.convertor.UsuarioMapper;
+
 import com.empresa.consumo.masivo.gestion.data.entity.Empresa;
-import com.empresa.consumo.masivo.gestion.data.entity.Producto;
 import com.empresa.consumo.masivo.gestion.data.entity.TipoUsuario;
 import com.empresa.consumo.masivo.gestion.data.entity.Usuario;
 import com.empresa.consumo.masivo.gestion.data.repository.UsuarioRepository;
@@ -63,7 +62,7 @@ public class UsuarioController {
 	public ResponseEntity<UserWithToken> getUsuarioById(@Valid @RequestBody LoginDTO loginDTO) {
 		Usuario usuario = usuarioRepository.findByEmailAndEnabledAndEmpresa_Enabled(loginDTO.getEmail(), Boolean.TRUE, Boolean.TRUE);
 
-		UsuarioDTO usuarioDTO = UsuarioMapper.INSTANCE
+		UsuarioDTO usuarioDTO = ProductoMapper.INSTANCE
 									.usuarioToUsuarioDTO(usuario);
 		if (usuarioDTO == null) {
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
@@ -94,7 +93,7 @@ public class UsuarioController {
 			return new ResponseEntity<>(HttpStatus.FOUND); 
 		}
 		
-		Usuario newUsuario = UsuarioMapper.INSTANCE.registerDTOToUsuario(registerDTO);
+		Usuario newUsuario = ProductoMapper.INSTANCE.registerDTOToUsuario(registerDTO);
 		newUsuario.setNombre(newUsuario.getNombre().trim());
 		newUsuario.setEmpresa(new Empresa(usuarioDTO.getEmpresaId()));
 		newUsuario.setTipoUsuario(new TipoUsuario(usuarioDTO.getTipoUsuario().getTipoUsuarioId()));
@@ -102,7 +101,7 @@ public class UsuarioController {
 		newUsuario.setEnabled(Boolean.TRUE);
 		usuarioRepository.save(newUsuario);
 		
-		UsuarioDTO newUsuarioDTO = UsuarioMapper.INSTANCE.usuarioToUsuarioDTO(newUsuario);
+		UsuarioDTO newUsuarioDTO = ProductoMapper.INSTANCE.usuarioToUsuarioDTO(newUsuario);
 		return new ResponseEntity<>(new UserWithToken(newUsuarioDTO, jwtService.toToken(newUsuarioDTO)) , HttpStatus.CREATED);
 	}
 
@@ -111,7 +110,7 @@ public class UsuarioController {
 
 		if (encryptService.check(currentPassword, usuarioDTO.getPassword())){
 			usuarioDTO.setPassword(encryptService.encrypt(newPassword));
-			Usuario usuario = UsuarioMapper.INSTANCE.usuarioDTOToUsuario(usuarioDTO);
+			Usuario usuario = ProductoMapper.INSTANCE.usuarioDTOToUsuario(usuarioDTO);
 			usuario.setEnabled(Boolean.TRUE);
 			usuarioRepository.save(usuario);
 			return new ResponseEntity<>(HttpStatus.OK);
@@ -156,7 +155,7 @@ public class UsuarioController {
 		if (!userId.isPresent()) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
-		if(!usuarioRepository.findById(Integer.parseInt(userId.get())).isPresent()) {
+		if(!usuarioRepository.findById(Long.parseLong(userId.get())).isPresent()) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 		
@@ -229,7 +228,7 @@ public class UsuarioController {
 			throw new UsuarioException("La dirección de email ya se encuentra utilizada por un usuario.");
 		}
 
-		UsuarioDTO savedUser = UsuarioMapper.INSTANCE.usuarioToUsuarioDTO(usuarioRepository.save(new Usuario(new Empresa(usuarioDTO.getEmpresaId()), new TipoUsuario(tipoUsuario.intValue()), nombre, email, encryptService.encrypt("password"), Boolean.TRUE, LocalDateTime.now(ZoneId.systemDefault()) ))) ;
+		UsuarioDTO savedUser = ProductoMapper.INSTANCE.usuarioToUsuarioDTO(usuarioRepository.save(new Usuario(new Empresa(usuarioDTO.getEmpresaId()), new TipoUsuario(tipoUsuario.intValue()), nombre, email, encryptService.encrypt("password"), Boolean.TRUE, LocalDateTime.now(ZoneId.systemDefault()) ))) ;
 		if (file != null) {
 			String fileName = uploadService.uploadUserImage(file, savedUser.getUsuarioId());
 		}
@@ -263,7 +262,7 @@ public class UsuarioController {
 		Page<UsuarioDTO> pageUsuarios = null;
 
 		pageUsuarios = usuarioRepository.findByEmpresa_EmpresaIdAndNombreContainingIgnoreCaseOrderByNombre(usuarioDTO.getEmpresaId(), search, pageable)
-				.map(UsuarioMapper.INSTANCE::usuarioToUsuarioDTOForDisplay);
+				.map(ProductoMapper.INSTANCE::usuarioToUsuarioDTOForDisplay);
 
 		return new ResponseEntity<>(pageUsuarios, HttpStatus.OK);
 	}
@@ -276,7 +275,7 @@ public class UsuarioController {
 		}
 		UsuarioDTO usuario = null;
 
-		usuario = UsuarioMapper.INSTANCE.usuarioToUsuarioDTOForDisplay(usuarioRepository.findByEmpresa_EmpresaIdAndUsuarioId(usuarioDTO.getEmpresaId(), usuarioId.intValue()));
+		usuario = ProductoMapper.INSTANCE.usuarioToUsuarioDTOForDisplay(usuarioRepository.findByEmpresa_EmpresaIdAndUsuarioId(usuarioDTO.getEmpresaId(), usuarioId));
 		return new ResponseEntity<>(usuario, HttpStatus.OK);
 	}
 
@@ -290,7 +289,7 @@ public class UsuarioController {
 			throw new UsuarioException("No puede cambiar su propio estado.");
 		}
 
-		usuarioRepository.findById(usuarioId.intValue()).ifPresent(u -> {
+		usuarioRepository.findById(usuarioId).ifPresent(u -> {
 			u.setEnabled(!u.getEnabled());
 			usuarioRepository.save(u);
 		});
@@ -305,7 +304,7 @@ public class UsuarioController {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 
-		usuarioRepository.findById(usuarioDTO.getUsuarioId().intValue()).ifPresent(u -> {
+		usuarioRepository.findById(usuarioDTO.getUsuarioId()).ifPresent(u -> {
 			u.setNombre(nombre.trim());
 			u.setEmail(email.trim());
 			usuarioRepository.save(u);

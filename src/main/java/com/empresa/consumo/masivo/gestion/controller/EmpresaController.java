@@ -13,7 +13,7 @@ import javax.validation.constraints.NotEmpty;
 
 import com.empresa.consumo.masivo.gestion.DTO.*;
 import com.empresa.consumo.masivo.gestion.constants.UsuarioTypesConstants;
-import com.empresa.consumo.masivo.gestion.convertor.EmpresaMapper;
+import com.empresa.consumo.masivo.gestion.convertor.ProductoMapper;
 import com.empresa.consumo.masivo.gestion.data.repository.EmpresaRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.empresa.consumo.masivo.gestion.convertor.UsuarioMapper;
 import com.empresa.consumo.masivo.gestion.data.entity.Empresa;
 import com.empresa.consumo.masivo.gestion.data.entity.TipoUsuario;
 import com.empresa.consumo.masivo.gestion.data.entity.Usuario;
@@ -69,7 +68,7 @@ public class EmpresaController {
 		if (usuarioDTO.getEmpresaId() != null) {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
-		Page<EmpresaDTO> empresaDTOPage = empresaRepository.findBy(pageable).map(EmpresaMapper.INSTANCE::empresaToEmpresaDTO);
+		Page<EmpresaDTO> empresaDTOPage = empresaRepository.findBy(pageable).map(ProductoMapper.INSTANCE::empresaToEmpresaDTO);
 		return new ResponseEntity<>( empresaDTOPage, HttpStatus.OK);
 	}
 
@@ -83,7 +82,7 @@ public class EmpresaController {
 		EmpresaDTO empresaDTO = null;
 		Optional<Empresa> empresa = empresaRepository.findById(usuarioDTO.getEmpresaId());
 		if (empresa.isPresent()) {
-			empresaDTO = EmpresaMapper.INSTANCE.empresaToEmpresaDTO(empresa.get());
+			empresaDTO = ProductoMapper.INSTANCE.empresaToEmpresaDTO(empresa.get());
 		}
 		return new ResponseEntity<>( empresaDTO, HttpStatus.OK);
 	}
@@ -95,7 +94,7 @@ public class EmpresaController {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
 
-		Empresa createEmpresa = EmpresaMapper.INSTANCE.registerEmpresaDTOToEmpresa(registerEmpresaDTO);
+		Empresa createEmpresa = ProductoMapper.INSTANCE.registerEmpresaDTOToEmpresa(registerEmpresaDTO);
 		createEmpresa.setEnabled(Boolean.TRUE);
 		empresaRepository.save(createEmpresa);
 		String generatedPassword = RandomStringUtils.randomAlphanumeric(10);
@@ -203,7 +202,7 @@ public class EmpresaController {
 		if (!userId.isPresent()) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
-		if(!usuarioRepository.findById(Integer.parseInt(userId.get())).isPresent()) {
+		if(!usuarioRepository.findById(Long.parseLong(userId.get())).isPresent()) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 		

@@ -1,14 +1,13 @@
 package com.empresa.consumo.masivo.gestion.config;
 
+import com.empresa.consumo.masivo.gestion.convertor.ProductoMapper;
+import com.empresa.consumo.masivo.gestion.data.repository.UsuarioRepository;
+import com.empresa.consumo.masivo.gestion.security.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.empresa.consumo.masivo.gestion.convertor.UsuarioMapper;
-import com.empresa.consumo.masivo.gestion.data.repository.UsuarioRepository;
-import com.empresa.consumo.masivo.gestion.security.JwtService;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -33,9 +32,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         getTokenString(request.getHeader(header)).ifPresent(token -> {
             jwtService.getSubFromToken(token).ifPresent(id -> {
                 if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                    userRepository.findById(Integer.parseInt(id)).ifPresent(usuario -> {
+                    userRepository.findById(Long.parseLong(id)).ifPresent(usuario -> {
                         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            UsuarioMapper.INSTANCE.usuarioToUsuarioDTO(usuario) ,
+                            ProductoMapper.INSTANCE.usuarioToUsuarioDTO(usuario) ,
                             null,
                             Collections.emptyList()
                         );

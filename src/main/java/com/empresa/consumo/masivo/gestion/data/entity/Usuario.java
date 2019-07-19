@@ -33,7 +33,7 @@ public class Usuario implements java.io.Serializable {
 	@Id
 	@SequenceGenerator(name="pk_sequence_usuario",sequenceName="gestion.usuario_id_sequence", allocationSize=1)
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="pk_sequence_usuario")
-	private int usuarioId;
+	private Long usuarioId;
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "empresa_id", nullable = false)
 	private Empresa empresa;
@@ -53,7 +53,11 @@ public class Usuario implements java.io.Serializable {
 	@Column(name = "fecha_creacion", nullable = false)
 	private LocalDateTime fechaCreacion;
 
-	public Usuario(int usuarioId, Empresa empresa, TipoUsuario tipoUsuario, String nombre, String email,
+	public Usuario(Long usuarioId){
+		this.usuarioId = usuarioId;
+	}
+
+	public Usuario(Long usuarioId, Empresa empresa, TipoUsuario tipoUsuario, String nombre, String email,
 			String password, LocalDateTime fechaCreacion) {
 		this.usuarioId = usuarioId;
 		this.empresa = empresa;

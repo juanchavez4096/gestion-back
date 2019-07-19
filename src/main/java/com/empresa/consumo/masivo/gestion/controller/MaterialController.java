@@ -202,6 +202,9 @@ public class MaterialController {
 		material.setEmpresa(new Empresa(usuarioDTO.getEmpresaId()));
 		material.setActivo(Boolean.TRUE);
 		material.setFechaCreacion(LocalDateTime.now(ZoneId.systemDefault()));
+		material.setCreadoPor(new Usuario(usuarioDTO.getUsuarioId()));
+		material.setFechaActualizacion(LocalDateTime.now(ZoneId.systemDefault()));
+		material.setActualizadoPor(new Usuario(usuarioDTO.getUsuarioId()));
 		MaterialDTO savedMaterial = ProductoMapper.INSTANCE.materialToMaterialDTO(materialRepository.save(material)) ;
 		if (file != null) {
 			String fileName = uploadService.uploadMaterialImage(file, savedMaterial.getMaterialId());
@@ -225,12 +228,16 @@ public class MaterialController {
 		
 		Material material = materialRepository.findById(materialDTO.getMaterialId()).get();
 		LocalDateTime fechaCreacion = material.getFechaCreacion();
+		Usuario creadoPor = material.getCreadoPor();
 		if (material.getEmpresa().getEmpresaId().longValue() == usuarioDTO.getEmpresaId().longValue()) {
 			material = ProductoMapper.INSTANCE.materialDTOToMaterial(materialDTO);
 			material.setNombre(material.getNombre().trim());
 			material.setEmpresa(new Empresa(usuarioDTO.getEmpresaId()));
 			material.setActivo(Boolean.TRUE);
 			material.setFechaCreacion(fechaCreacion);
+			material.setCreadoPor(creadoPor);
+			material.setFechaActualizacion(LocalDateTime.now(ZoneId.systemDefault()));
+			material.setActualizadoPor(new Usuario(usuarioDTO.getUsuarioId()));
 			materialRepository.save(material);
 			productoController.getAllProductsByMaterialIdWithUpdate(material.getMaterialId(), usuarioDTO.getEmpresaId(),false, null, null);
 			return new ResponseEntity<>(HttpStatus.OK);
@@ -304,7 +311,7 @@ public class MaterialController {
 		if (!userId.isPresent()) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
-		Optional<Usuario> usuario = usuarioRepository.findById(Integer.parseInt(userId.get()));
+		Optional<Usuario> usuario = usuarioRepository.findById(Long.parseLong(userId.get()));
 		if(!usuario.isPresent()) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}

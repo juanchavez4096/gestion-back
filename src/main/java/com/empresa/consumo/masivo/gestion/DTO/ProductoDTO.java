@@ -25,7 +25,10 @@ public class ProductoDTO implements Serializable {
 	private Double depreciacion;
 	private String precioVentaDolares;
 	private LocalDateTime fechaCreacion;
-	
+	private UsuarioDTO creadoPor;
+	private LocalDateTime fechaActualizacion;
+	private UsuarioDTO actualizadoPor;
+
 	public ProductoDTO() {
 		super();
 	}

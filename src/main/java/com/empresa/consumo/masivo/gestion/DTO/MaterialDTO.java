@@ -24,6 +24,9 @@ public class MaterialDTO implements java.io.Serializable {
 	@NotNull
 	private Double cantidadCompra;
 	private LocalDateTime fechaCreacion;
+	private UsuarioDTO creadoPor;
+	private LocalDateTime fechaActualizacion;
+	private UsuarioDTO actualizadoPor;
 
 	public MaterialDTO() {
 	}

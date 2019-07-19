@@ -1,5 +1,7 @@
 package com.empresa.consumo.masivo.gestion.controller;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -8,7 +10,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 
-import com.empresa.consumo.masivo.gestion.data.entity.ProductoHistory;
+import com.empresa.consumo.masivo.gestion.data.entity.*;
 import com.empresa.consumo.masivo.gestion.data.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,9 +34,6 @@ import com.empresa.consumo.masivo.gestion.DTO.ProductoMaterialDTO;
 import com.empresa.consumo.masivo.gestion.DTO.TipoUnidadDTO;
 import com.empresa.consumo.masivo.gestion.DTO.UsuarioDTO;
 import com.empresa.consumo.masivo.gestion.convertor.ProductoMapper;
-import com.empresa.consumo.masivo.gestion.data.entity.Material;
-import com.empresa.consumo.masivo.gestion.data.entity.Producto;
-import com.empresa.consumo.masivo.gestion.data.entity.ProductoMaterial;
 
 @RestController
 @RequestMapping("api/productoMaterial")
@@ -134,12 +133,13 @@ public class ProductoMaterialController {
 		ProductoMaterial productoMaterial = new ProductoMaterial(new Material(addProductoMaterialDTO.getMaterialId()), new Producto(addProductoMaterialDTO.getProductoId()), ProductoMapper.INSTANCE.tipoUnidadDTOToTipoUnidad(addProductoMaterialDTO.getTipoUnidad()), addProductoMaterialDTO.getCantidad());
 		productoMaterialRepository.save(productoMaterial);
 
-
+		productoRepository.findById(addProductoMaterialDTO.getProductoId()).ifPresent(p -> {
+			p.setActualizadoPor(new Usuario(usuarioDTO.getUsuarioId()));
+			p.setFechaActualizacion(LocalDateTime.now(ZoneId.systemDefault()));
+			productoRepository.save(p);
+		});
 
 		productoController.getAllProductsByMaterialIdWithUpdate(productoMaterial.getProducto().getProductoId(), usuarioDTO.getEmpresaId(), true, null, null);
-
-
-
 		
 		
 		return new ResponseEntity<>(HttpStatus.CREATED);
@@ -167,6 +167,11 @@ public class ProductoMaterialController {
 			productoMaterial.get().setCantidad(modifyProductoMaterialDTO.getCantidad());
 			productoMaterial.get().setTipoUnidad(ProductoMapper.INSTANCE.tipoUnidadDTOToTipoUnidad(modifyProductoMaterialDTO.getTipoUnidad()));
 			productoMaterialRepository.save(productoMaterial.get());
+
+			producto.setActualizadoPor(new Usuario(usuarioDTO.getUsuarioId()));
+			producto.setFechaActualizacion(LocalDateTime.now(ZoneId.systemDefault()));
+			productoRepository.save(producto);
+
 			productoController.getAllProductsByMaterialIdWithUpdate(productoMaterial.get().getProducto().getProductoId(), usuarioDTO.getEmpresaId(), true, null, null);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}else {

@@ -45,6 +45,14 @@ public class Producto implements java.io.Serializable {
 	private Double depreciacion;
 	@Column(name = "fecha_creacion", nullable = false)
 	private LocalDateTime fechaCreacion;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(referencedColumnName = "usuarioId", name = "creado_por", nullable = false)
+	private Usuario creadoPor;
+	@Column(name = "fecha_actualizacion", nullable = false)
+	private LocalDateTime fechaActualizacion;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(referencedColumnName = "usuarioId", name = "actualizado_por", nullable = false)
+	private Usuario actualizadoPor;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "producto")
 	private Set<ProductoMaterial> productoMaterials = new HashSet<>(0);
 
@@ -56,34 +64,38 @@ public class Producto implements java.io.Serializable {
 		this.productoId = productoId;
 	}
 
-	public Producto(Empresa empresa, String nombre, Double depreciacion, LocalDateTime fechaCreacion) {
+	public Producto(Empresa empresa, String nombre, Double depreciacion, LocalDateTime fechaCreacion, Usuario creadoPor, LocalDateTime fechaActualizacion, Usuario actualizadoPor) {
 		super();
 		this.empresa = empresa;
 		this.nombre = nombre;
 		this.depreciacion = depreciacion;
 		this.fechaCreacion = fechaCreacion;
+		this.creadoPor = creadoPor;
+		this.fechaActualizacion = fechaActualizacion;
+		this.actualizadoPor = actualizadoPor;
 		this.activo = true;
 	}
 
-	public Producto(Long productoId, Empresa empresa, String nombre, Double depreciacion, LocalDateTime fechaCreacion) {
+	public Producto(Long productoId, Empresa empresa, String nombre, Double depreciacion, LocalDateTime fechaCreacion, Usuario creadoPor, LocalDateTime fechaActualizacion, Usuario actualizadoPor) {
 		this.productoId = productoId;
 		this.empresa = empresa;
 		this.nombre = nombre;
 		this.depreciacion = depreciacion;
 		this.fechaCreacion = fechaCreacion;
+		this.creadoPor = creadoPor;
+		this.fechaActualizacion = fechaActualizacion;
+		this.actualizadoPor = actualizadoPor;
 	}
 
-	public Producto(Long productoId, Empresa empresa, String nombre, Double depreciacion, LocalDateTime fechaCreacion, Set productoMaterials) {
+	public Producto(Long productoId, Empresa empresa, String nombre, Double depreciacion, LocalDateTime fechaCreacion, Usuario creadoPor, LocalDateTime fechaActualizacion, Usuario actualizadoPor, Set productoMaterials) {
 		this.productoId = productoId;
 		this.empresa = empresa;
 		this.nombre = nombre;
 		this.depreciacion = depreciacion;
 		this.fechaCreacion = fechaCreacion;
 		this.productoMaterials = productoMaterials;
+		this.creadoPor = creadoPor;
+		this.fechaActualizacion = fechaActualizacion;
+		this.actualizadoPor = actualizadoPor;
 	}
-
-	
-
-	
-	
 }

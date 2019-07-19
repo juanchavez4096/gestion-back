@@ -39,6 +39,14 @@ public class Material implements java.io.Serializable {
 	private Boolean activo;
 	@Column(name = "fecha_creacion", nullable = false)
 	private LocalDateTime fechaCreacion;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(referencedColumnName = "usuarioId", name = "creado_por", nullable = false)
+	private Usuario creadoPor;
+	@Column(name = "fecha_actualizacion", nullable = false)
+	private LocalDateTime fechaActualizacion;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(referencedColumnName = "usuarioId", name = "actualizado_por", nullable = false)
+	private Usuario actualizadoPor;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "material")
 	private Set<ProductoMaterial> productoMaterials = new HashSet<>(0);
 

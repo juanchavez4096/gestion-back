@@ -32,6 +32,7 @@ public class UsuarioDTO implements Serializable {
 	private String password;
 	private Boolean enabled;
 	private LocalDateTime fechaCreacion;
+
 	
 	
 }
