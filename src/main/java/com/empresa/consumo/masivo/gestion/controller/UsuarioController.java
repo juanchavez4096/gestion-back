@@ -298,4 +298,20 @@ public class UsuarioController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	@RequestMapping(value="updateUser", method = RequestMethod.GET)
+	public ResponseEntity<Void> updateUser(@AuthenticationPrincipal UsuarioDTO usuarioDTO, @RequestParam(value = "nombre") String nombre, @RequestParam(value = "email") String email) throws UsuarioException {
+
+		if (usuarioDTO.getEmpresaId() == null) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+
+		usuarioRepository.findById(usuarioDTO.getUsuarioId().intValue()).ifPresent(u -> {
+			u.setNombre(nombre.trim());
+			u.setEmail(email.trim());
+			usuarioRepository.save(u);
+		});
+
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
 }
