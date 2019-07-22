@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,6 +56,11 @@ public class PdfService {
 		templateEngine.setTemplateResolver(templateResolver);
 
 		Context context = new Context();
+
+		Calendar c = Calendar.getInstance();
+		c.setTime(hasta);
+		c.add(Calendar.DATE, 1);
+		hasta = c.getTime();
 
 		Pdf pdf = null;
 		if (type.equals("Materiales")){
