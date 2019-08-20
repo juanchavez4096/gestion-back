@@ -31,8 +31,8 @@ spring:
       max-request-size: 10MB
   mail:
     host: smtp.gmail.com
-    username: dragonax360@gmail.com
-    password: jgfijubjpbjgknbw
+    username: email@example.com
+    password: password
     properties:
       mail:
         transport:
