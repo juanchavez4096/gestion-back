@@ -1,0 +1,721 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.5.17
+-- Dumped by pg_dump version 9.5.17
+
+-- Started on 2019-07-19 16:54:11 -04
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 17 (class 2615 OID 216906)
+-- Name: gestion; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA gestion;
+
+
+--
+-- TOC entry 602 (class 1259 OID 216907)
+-- Name: empresa_id_sequence; Type: SEQUENCE; Schema: gestion; Owner: -
+--
+
+CREATE SEQUENCE gestion.empresa_id_sequence
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- TOC entry 603 (class 1259 OID 216909)
+-- Name: empresa; Type: TABLE; Schema: gestion; Owner: -
+--
+
+CREATE TABLE gestion.empresa (
+    empresa_id integer DEFAULT nextval('gestion.empresa_id_sequence'::regclass) NOT NULL,
+    nombre character varying(50) NOT NULL,
+    enabled boolean NOT NULL,
+    iva boolean DEFAULT false,
+    porcentaje_ganancia real,
+    mostrar_precio_dolar boolean DEFAULT false,
+    actualizar_dolar_auto boolean DEFAULT true,
+    precio_dolar real,
+    valor_iva real DEFAULT 16 NOT NULL
+);
+
+
+--
+-- TOC entry 604 (class 1259 OID 216913)
+-- Name: material_id_sequence; Type: SEQUENCE; Schema: gestion; Owner: -
+--
+
+CREATE SEQUENCE gestion.material_id_sequence
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 605 (class 1259 OID 216915)
+-- Name: material; Type: TABLE; Schema: gestion; Owner: -
+--
+
+CREATE TABLE gestion.material (
+    material_id integer DEFAULT nextval('gestion.material_id_sequence'::regclass) NOT NULL,
+    nombre character varying(100) NOT NULL,
+    costo double precision NOT NULL,
+    tipo_unidad_id integer NOT NULL,
+    cantidad_compra double precision NOT NULL,
+    empresa_id integer NOT NULL,
+    activo boolean NOT NULL,
+    fecha_creacion timestamp with time zone NOT NULL,
+    creado_por integer NOT NULL,
+    fecha_actualizacion timestamp with time zone NOT NULL,
+    actualizado_por integer NOT NULL
+);
+
+
+--
+-- TOC entry 606 (class 1259 OID 216919)
+-- Name: producto_id_sequence; Type: SEQUENCE; Schema: gestion; Owner: -
+--
+
+CREATE SEQUENCE gestion.producto_id_sequence
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 607 (class 1259 OID 216921)
+-- Name: producto; Type: TABLE; Schema: gestion; Owner: -
+--
+
+CREATE TABLE gestion.producto (
+    producto_id integer DEFAULT nextval('gestion.producto_id_sequence'::regclass) NOT NULL,
+    nombre character varying(100) NOT NULL,
+    empresa_id integer NOT NULL,
+    activo boolean NOT NULL,
+    depreciacion real DEFAULT 0 NOT NULL,
+    fecha_creacion timestamp with time zone NOT NULL,
+    creado_por integer NOT NULL,
+    fecha_actualizacion timestamp with time zone NOT NULL,
+    actualizado_por integer NOT NULL
+);
+
+
+--
+-- TOC entry 633 (class 1259 OID 422587)
+-- Name: producto_history_id_sequence; Type: SEQUENCE; Schema: gestion; Owner: -
+--
+
+CREATE SEQUENCE gestion.producto_history_id_sequence
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 632 (class 1259 OID 422582)
+-- Name: producto_history; Type: TABLE; Schema: gestion; Owner: -
+--
+
+CREATE TABLE gestion.producto_history (
+    producto_history_id integer DEFAULT nextval('gestion.producto_history_id_sequence'::regclass) NOT NULL,
+    fecha_creacion timestamp with time zone DEFAULT now() NOT NULL,
+    producto_id integer NOT NULL,
+    precio_venta real NOT NULL
+);
+
+
+--
+-- TOC entry 608 (class 1259 OID 216925)
+-- Name: producto_material_id_sequence; Type: SEQUENCE; Schema: gestion; Owner: -
+--
+
+CREATE SEQUENCE gestion.producto_material_id_sequence
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 609 (class 1259 OID 216927)
+-- Name: producto_material; Type: TABLE; Schema: gestion; Owner: -
+--
+
+CREATE TABLE gestion.producto_material (
+    producto_material_id integer DEFAULT nextval('gestion.producto_material_id_sequence'::regclass) NOT NULL,
+    producto_id integer NOT NULL,
+    material_id integer NOT NULL,
+    cantidad double precision NOT NULL,
+    tipo_unidad_id integer NOT NULL
+);
+
+
+--
+-- TOC entry 610 (class 1259 OID 216931)
+-- Name: tipo_material_id_sequence; Type: SEQUENCE; Schema: gestion; Owner: -
+--
+
+CREATE SEQUENCE gestion.tipo_material_id_sequence
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 611 (class 1259 OID 216940)
+-- Name: tipo_unidad; Type: TABLE; Schema: gestion; Owner: -
+--
+
+CREATE TABLE gestion.tipo_unidad (
+    tipo_unidad_id integer NOT NULL,
+    tipo character varying NOT NULL,
+    unidad character varying NOT NULL,
+    referencia_en_gramos double precision NOT NULL,
+    agrupacion integer
+);
+
+
+--
+-- TOC entry 612 (class 1259 OID 216946)
+-- Name: tipo_usuario; Type: TABLE; Schema: gestion; Owner: -
+--
+
+CREATE TABLE gestion.tipo_usuario (
+    tipo_usuario_id integer NOT NULL,
+    tipo character varying NOT NULL
+);
+
+
+--
+-- TOC entry 613 (class 1259 OID 216952)
+-- Name: usuario_id_sequence; Type: SEQUENCE; Schema: gestion; Owner: -
+--
+
+CREATE SEQUENCE gestion.usuario_id_sequence
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 614 (class 1259 OID 216954)
+-- Name: usuario; Type: TABLE; Schema: gestion; Owner: -
+--
+
+CREATE TABLE gestion.usuario (
+    usuario_id integer DEFAULT nextval('gestion.usuario_id_sequence'::regclass) NOT NULL,
+    nombre character varying(25) NOT NULL,
+    email character varying(25) NOT NULL,
+    password character varying(200) NOT NULL,
+    empresa_id integer,
+    tipo_usuario_id integer NOT NULL,
+    enabled boolean NOT NULL,
+    codigo_recuperacion character varying,
+    fecha_creacion timestamp with time zone NOT NULL
+);
+
+
+--
+-- TOC entry 3289 (class 0 OID 216909)
+-- Dependencies: 603
+-- Data for Name: empresa; Type: TABLE DATA; Schema: gestion; Owner: -
+--
+
+INSERT INTO gestion.empresa VALUES (1, 'la de lore', true, true, 30, true, true, 10606.3301, 16);
+
+
+--
+-- TOC entry 3308 (class 0 OID 0)
+-- Dependencies: 602
+-- Name: empresa_id_sequence; Type: SEQUENCE SET; Schema: gestion; Owner: -
+--
+
+SELECT pg_catalog.setval('gestion.empresa_id_sequence', 1, true);
+
+
+--
+-- TOC entry 3291 (class 0 OID 216915)
+-- Dependencies: 605
+-- Data for Name: material; Type: TABLE DATA; Schema: gestion; Owner: -
+--
+
+INSERT INTO gestion.material VALUES (10, 'kk', 50000, 1, 25, 1, false, '2019-07-15 09:46:14.147-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.material VALUES (5, 'Este', 5000, 2, 1, 1, false, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.material VALUES (11, 'wadwa', 50, 2, 25, 1, true, '2019-07-18 02:13:53.718-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.material VALUES (12, 'hola', 50, 2, 55, 1, true, '2019-07-19 11:11:52.048-04', 9, '2019-07-19 11:12:00.202-04', 9);
+INSERT INTO gestion.material VALUES (6, 'Carnee', 10000, 2, 2, 1, true, '2019-06-28 12:28:23-04', 5, '2019-07-19 11:36:39.225-04', 9);
+INSERT INTO gestion.material VALUES (9, 'Sal', 3600, 2, 2, 1, true, '2019-06-28 12:28:23-04', 5, '2019-07-19 11:37:05.434-04', 5);
+INSERT INTO gestion.material VALUES (1, 'aceite', 50, 1, 20, 1, false, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.material VALUES (2, 'carbon', 50, 1, 20, 1, true, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.material VALUES (8, 'Huevos', 26000, 10, 30, 1, true, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.material VALUES (7, 'Aceite', 25000, 4, 2, 1, true, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.material VALUES (3, 'agua', 10000, 4, 2, 1, true, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+
+
+--
+-- TOC entry 3309 (class 0 OID 0)
+-- Dependencies: 604
+-- Name: material_id_sequence; Type: SEQUENCE SET; Schema: gestion; Owner: -
+--
+
+SELECT pg_catalog.setval('gestion.material_id_sequence', 12, true);
+
+
+--
+-- TOC entry 3293 (class 0 OID 216921)
+-- Dependencies: 607
+-- Data for Name: producto; Type: TABLE DATA; Schema: gestion; Owner: -
+--
+
+INSERT INTO gestion.producto VALUES (7, 'mayonesa1', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (6, 'mayonesa1', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (12, 'olaaaa', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (23, 'omarcito', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (21, 'Perozo', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (19, 'rick y morty', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (13, 'sefasefasef', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (27, 'Mayonesa', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (28, 'fesfas', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (29, '1256wdad', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (30, 'Mayonesa', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (31, 'Mayonesazadaw', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (34, 'fdsfe', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (36, 'dsfse', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (2, 'este veeeee', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (15, 'ola', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (33, 'olasddfessdawdaw', 1, false, 5, '2019-06-28 12:28:23-04', 5, '2019-07-19 11:42:25.792-04', 9);
+INSERT INTO gestion.producto VALUES (32, 'Mayonesa', 1, true, 21, '2019-06-28 12:28:23-04', 5, '2019-07-19 16:09:20.783-04', 5);
+INSERT INTO gestion.producto VALUES (39, 'wadwad', 1, false, 0, '2019-07-18 02:13:41.362-04', 5, '2019-07-19 11:42:39.742-04', 9);
+INSERT INTO gestion.producto VALUES (40, 'juancho1', 1, false, 0, '2019-07-19 11:00:23.283-04', 9, '2019-07-19 11:00:56.916-04', 5);
+INSERT INTO gestion.producto VALUES (24, 'omarcito2', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (8, '', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (9, '', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (10, '', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (11, 'asfeasefa', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (18, 'dffdsg', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (14, 'ees', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (16, 'fseafsef', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (26, 'fsefdw', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (20, 'ibm', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (22, 'juan', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (17, 'juancho', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (25, 'malave', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (1, 'mayonesa', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (3, 'mayonesa1', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (4, 'mayonesa1', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (5, 'mayonesa1', 1, false, 0, '2019-06-28 12:28:23-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (41, '2312', 1, false, 0, '2019-07-19 11:14:14.986-04', 9, '2019-07-19 11:14:17.552-04', 9);
+INSERT INTO gestion.producto VALUES (38, 'aasadw', 1, false, 0, '2019-07-15 09:45:50.075-04', 5, '2019-06-28 12:28:23-04', 5);
+INSERT INTO gestion.producto VALUES (42, 'dsafe', 1, true, 0, '2019-07-19 11:33:23.513-04', 5, '2019-07-19 11:33:23.513-04', 5);
+
+
+--
+-- TOC entry 3301 (class 0 OID 422582)
+-- Dependencies: 632
+-- Data for Name: producto_history; Type: TABLE DATA; Schema: gestion; Owner: -
+--
+
+INSERT INTO gestion.producto_history VALUES (3, '2019-06-26 14:08:41.586-04', 32, 16929.8125);
+INSERT INTO gestion.producto_history VALUES (4, '2019-06-26 14:09:36.908-04', 32, 16944.8926);
+INSERT INTO gestion.producto_history VALUES (5, '2019-06-26 14:15:37.394-04', 33, 8294);
+INSERT INTO gestion.producto_history VALUES (6, '2019-06-26 14:16:08.033-04', 32, 16944.8926);
+INSERT INTO gestion.producto_history VALUES (7, '2019-06-26 14:16:08.037-04', 33, 8294);
+INSERT INTO gestion.producto_history VALUES (8, '2019-06-27 10:12:46.667-04', 32, 6489.42676);
+INSERT INTO gestion.producto_history VALUES (9, '2019-06-27 10:12:53.796-04', 32, 9103.29297);
+INSERT INTO gestion.producto_history VALUES (10, '2019-06-27 10:15:08.536-04', 32, 5182.49316);
+INSERT INTO gestion.producto_history VALUES (11, '2019-06-27 10:36:20.107-04', 32, 16944.8926);
+INSERT INTO gestion.producto_history VALUES (12, '2019-06-27 10:40:36.399-04', 32, 17053.4688);
+INSERT INTO gestion.producto_history VALUES (13, '2019-06-27 11:35:06.601-04', 32, 17818.7793);
+INSERT INTO gestion.producto_history VALUES (14, '2019-06-27 11:35:06.604-04', 33, 10367.5);
+INSERT INTO gestion.producto_history VALUES (15, '2019-06-27 15:39:30.075-04', 32, 22273.4746);
+INSERT INTO gestion.producto_history VALUES (16, '2019-06-27 15:39:35.7-04', 32, 17818.7793);
+INSERT INTO gestion.producto_history VALUES (17, '2019-06-27 15:39:46.921-04', 32, 17762.2285);
+INSERT INTO gestion.producto_history VALUES (18, '2019-06-27 15:57:36.456-04', 32, 17762.2285);
+INSERT INTO gestion.producto_history VALUES (19, '2019-06-28 11:12:06.857-04', 33, 10367.5);
+INSERT INTO gestion.producto_history VALUES (20, '2019-06-28 11:12:14.896-04', 33, 10885.875);
+INSERT INTO gestion.producto_history VALUES (21, '2019-06-28 11:20:17.063-04', 32, 20426.5645);
+INSERT INTO gestion.producto_history VALUES (22, '2019-06-28 11:23:03.239-04', 32, 21314.6758);
+INSERT INTO gestion.producto_history VALUES (23, '2019-06-28 12:28:19.965-04', 32, 21314.6758);
+INSERT INTO gestion.producto_history VALUES (24, '2019-06-28 12:28:23.069-04', 32, 21314.6758);
+INSERT INTO gestion.producto_history VALUES (25, '2019-07-15 09:45:53.908-04', 33, 10885.875);
+INSERT INTO gestion.producto_history VALUES (26, '2019-07-15 09:45:55.426-04', 33, 10885.875);
+INSERT INTO gestion.producto_history VALUES (27, '2019-07-15 09:45:56.128-04', 33, 10885.875);
+INSERT INTO gestion.producto_history VALUES (28, '2019-07-15 09:45:58.245-04', 33, 10885.875);
+INSERT INTO gestion.producto_history VALUES (29, '2019-07-18 02:01:14.091-04', 32, 25577.6094);
+INSERT INTO gestion.producto_history VALUES (30, '2019-07-18 02:01:24.068-04', 32, 26437.3027);
+INSERT INTO gestion.producto_history VALUES (31, '2019-07-18 02:02:15.721-04', 32, 26437.3027);
+INSERT INTO gestion.producto_history VALUES (32, '2019-07-18 02:02:20.304-04', 32, 26005.6797);
+INSERT INTO gestion.producto_history VALUES (33, '2019-07-18 02:14:11.645-04', 39, 18850);
+INSERT INTO gestion.producto_history VALUES (34, '2019-07-18 08:57:13.182-04', 39, 18850);
+INSERT INTO gestion.producto_history VALUES (35, '2019-07-18 08:57:30.366-04', 32, 26005.6797);
+INSERT INTO gestion.producto_history VALUES (36, '2019-07-18 09:02:06.539-04', 32, 26005.6797);
+INSERT INTO gestion.producto_history VALUES (37, '2019-07-18 09:02:13.243-04', 32, 26005.6797);
+INSERT INTO gestion.producto_history VALUES (38, '2019-07-18 09:02:14.181-04', 32, 26005.6797);
+INSERT INTO gestion.producto_history VALUES (39, '2019-07-18 09:02:15.939-04', 32, 26005.6797);
+INSERT INTO gestion.producto_history VALUES (40, '2019-07-18 09:02:16.501-04', 32, 26005.6797);
+INSERT INTO gestion.producto_history VALUES (41, '2019-07-18 09:02:23.11-04', 32, 25330.0742);
+INSERT INTO gestion.producto_history VALUES (42, '2019-07-18 09:17:28.203-04', 32, 25330.0742);
+INSERT INTO gestion.producto_history VALUES (43, '2019-07-18 09:18:55.623-04', 32, 25330.0742);
+INSERT INTO gestion.producto_history VALUES (44, '2019-07-18 09:19:01.19-04', 32, 25330.0742);
+INSERT INTO gestion.producto_history VALUES (45, '2019-07-19 10:23:05.848-04', 32, 25330.0742);
+INSERT INTO gestion.producto_history VALUES (46, '2019-07-19 10:23:10.512-04', 32, 25330.0742);
+INSERT INTO gestion.producto_history VALUES (47, '2019-07-19 10:23:13.252-04', 32, 25330.0742);
+INSERT INTO gestion.producto_history VALUES (48, '2019-07-19 11:00:56.924-04', 40, 0);
+INSERT INTO gestion.producto_history VALUES (49, '2019-07-19 11:10:57.513-04', 32, 25330.0742);
+INSERT INTO gestion.producto_history VALUES (50, '2019-07-19 11:12:46.925-04', 40, 171004.188);
+INSERT INTO gestion.producto_history VALUES (51, '2019-07-19 11:14:17.557-04', 41, 0);
+INSERT INTO gestion.producto_history VALUES (52, '2019-07-19 11:35:48.523-04', 40, 171004.188);
+INSERT INTO gestion.producto_history VALUES (53, '2019-07-19 11:36:39.232-04', 40, 171004.188);
+INSERT INTO gestion.producto_history VALUES (54, '2019-07-19 11:37:05.443-04', 32, 25330.0742);
+INSERT INTO gestion.producto_history VALUES (55, '2019-07-19 11:37:32.171-04', 32, 25330.0742);
+INSERT INTO gestion.producto_history VALUES (56, '2019-07-19 11:38:01.401-04', 42, 68.5454559);
+INSERT INTO gestion.producto_history VALUES (57, '2019-07-19 11:42:25.809-04', 33, 11437.7256);
+INSERT INTO gestion.producto_history VALUES (58, '2019-07-19 11:42:39.76-04', 39, 22620);
+INSERT INTO gestion.producto_history VALUES (59, '2019-07-19 11:44:02.969-04', 32, 63599.6953);
+INSERT INTO gestion.producto_history VALUES (60, '2019-07-19 16:09:20.803-04', 32, 25330.0742);
+
+
+--
+-- TOC entry 3310 (class 0 OID 0)
+-- Dependencies: 633
+-- Name: producto_history_id_sequence; Type: SEQUENCE SET; Schema: gestion; Owner: -
+--
+
+SELECT pg_catalog.setval('gestion.producto_history_id_sequence', 60, true);
+
+
+--
+-- TOC entry 3311 (class 0 OID 0)
+-- Dependencies: 606
+-- Name: producto_id_sequence; Type: SEQUENCE SET; Schema: gestion; Owner: -
+--
+
+SELECT pg_catalog.setval('gestion.producto_id_sequence', 42, true);
+
+
+--
+-- TOC entry 3295 (class 0 OID 216927)
+-- Dependencies: 609
+-- Data for Name: producto_material; Type: TABLE DATA; Schema: gestion; Owner: -
+--
+
+INSERT INTO gestion.producto_material VALUES (3, 1, 1, 5, 1);
+INSERT INTO gestion.producto_material VALUES (4, 1, 1, 5, 1);
+INSERT INTO gestion.producto_material VALUES (5, 1, 1, 5, 1);
+INSERT INTO gestion.producto_material VALUES (6, 1, 1, 5, 1);
+INSERT INTO gestion.producto_material VALUES (7, 1, 1, 5, 1);
+INSERT INTO gestion.producto_material VALUES (8, 1, 1, 5, 1);
+INSERT INTO gestion.producto_material VALUES (27, 33, 7, 550, 3);
+INSERT INTO gestion.producto_material VALUES (24, 32, 9, 170, 1);
+INSERT INTO gestion.producto_material VALUES (25, 32, 7, 200, 3);
+INSERT INTO gestion.producto_material VALUES (29, 40, 6, 50, 6);
+INSERT INTO gestion.producto_material VALUES (30, 42, 12, 50, 2);
+INSERT INTO gestion.producto_material VALUES (31, 33, 12, 5, 2);
+INSERT INTO gestion.producto_material VALUES (28, 39, 2, 6, 2);
+INSERT INTO gestion.producto_material VALUES (26, 32, 8, 10, 10);
+
+
+--
+-- TOC entry 3312 (class 0 OID 0)
+-- Dependencies: 608
+-- Name: producto_material_id_sequence; Type: SEQUENCE SET; Schema: gestion; Owner: -
+--
+
+SELECT pg_catalog.setval('gestion.producto_material_id_sequence', 31, true);
+
+
+--
+-- TOC entry 3313 (class 0 OID 0)
+-- Dependencies: 610
+-- Name: tipo_material_id_sequence; Type: SEQUENCE SET; Schema: gestion; Owner: -
+--
+
+SELECT pg_catalog.setval('gestion.tipo_material_id_sequence', 1, true);
+
+
+--
+-- TOC entry 3297 (class 0 OID 216940)
+-- Dependencies: 611
+-- Data for Name: tipo_unidad; Type: TABLE DATA; Schema: gestion; Owner: -
+--
+
+INSERT INTO gestion.tipo_unidad VALUES (1, 'Gramos', 'gr', 1, 1);
+INSERT INTO gestion.tipo_unidad VALUES (2, 'Kilogramos', 'kg', 1000, 1);
+INSERT INTO gestion.tipo_unidad VALUES (3, 'Mili Litros', 'ml', 1, 2);
+INSERT INTO gestion.tipo_unidad VALUES (4, 'Litros', 'L', 1000, 2);
+INSERT INTO gestion.tipo_unidad VALUES (5, 'Onzas', 'oz', 28.3459000000000003, 2);
+INSERT INTO gestion.tipo_unidad VALUES (6, 'Libra', 'lbs', 453.591999999999985, 1);
+INSERT INTO gestion.tipo_unidad VALUES (7, 'Taza', 'tazas', 236.587999999999994, 2);
+INSERT INTO gestion.tipo_unidad VALUES (8, 'Galón', 'galones', 3785.40999999999985, 2);
+INSERT INTO gestion.tipo_unidad VALUES (9, 'Tonelada', 'T', 1000000, 1);
+INSERT INTO gestion.tipo_unidad VALUES (10, 'Unidad', 'unidades', 1, 3);
+
+
+--
+-- TOC entry 3298 (class 0 OID 216946)
+-- Dependencies: 612
+-- Data for Name: tipo_usuario; Type: TABLE DATA; Schema: gestion; Owner: -
+--
+
+INSERT INTO gestion.tipo_usuario VALUES (1, 'Administrador');
+INSERT INTO gestion.tipo_usuario VALUES (2, 'Usuario');
+
+
+--
+-- TOC entry 3300 (class 0 OID 216954)
+-- Dependencies: 614
+-- Data for Name: usuario; Type: TABLE DATA; Schema: gestion; Owner: -
+--
+
+INSERT INTO gestion.usuario VALUES (5, 'Juan Chavez', 'jjchavez@urbe.edu.ve', '$2a$10$JQPAozzd6NcHN5sR0O/1LOdNVeF/56I2eDXWgO6vWsT2xiMro1b8y', 1, 1, true, NULL, '2019-06-28 12:28:23-04');
+INSERT INTO gestion.usuario VALUES (9, 'Jeremy', 'jleon@intelenz.com', '$2a$10$bQhkfE28NiSgRSrtdmEYWOvxqTj/Mw5sdHYJgdVPiZEqD1KYWr3/u', 1, 2, true, NULL, '2019-06-28 12:28:23-04');
+INSERT INTO gestion.usuario VALUES (1, 'Juan', 'juanchavez@gmail.com', '$2a$10$bQhkfE28NiSgRSrtdmEYWOvxqTj/Mw5sdHYJgdVPiZEqD1KYWr3/u', 1, 1, true, NULL, '2019-06-28 12:28:23-04');
+INSERT INTO gestion.usuario VALUES (8, 'Juancho', 'dragonax360@gmail.com', '$2a$10$r9BSOSA33nCJuxQC1/GWfObnYfAIUu/X/Vxd15yBq.YKnjzgSxIzW', 1, 2, true, NULL, '2019-06-28 12:28:23-04');
+INSERT INTO gestion.usuario VALUES (7, 'Omar Perozo', 'operozo@intelenz.com', '$2a$10$nee8BxYiZT6IChgRl7R8x.vv8KgmvIgLm1Le0LMEj5/y8TohMaDWu', 1, 1, true, NULL, '2019-06-28 12:28:23-04');
+INSERT INTO gestion.usuario VALUES (10, 'ffef', 'ea@awd.com', '$2a$10$3YhMjdzCmOx0WdkQ0ZlQuetObhg5iH8LdH/jiI6c/6J/QSFv79ZWq', 1, 2, true, NULL, '2019-07-18 14:06:39.997-04');
+
+
+--
+-- TOC entry 3314 (class 0 OID 0)
+-- Dependencies: 613
+-- Name: usuario_id_sequence; Type: SEQUENCE SET; Schema: gestion; Owner: -
+--
+
+SELECT pg_catalog.setval('gestion.usuario_id_sequence', 10, true);
+
+
+--
+-- TOC entry 3142 (class 2606 OID 216959)
+-- Name: empresa_pk; Type: CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.empresa
+    ADD CONSTRAINT empresa_pk PRIMARY KEY (empresa_id);
+
+
+--
+-- TOC entry 3144 (class 2606 OID 216961)
+-- Name: ingrediente_pk; Type: CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.material
+    ADD CONSTRAINT ingrediente_pk PRIMARY KEY (material_id);
+
+
+--
+-- TOC entry 3158 (class 2606 OID 422586)
+-- Name: producto_history_pk; Type: CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.producto_history
+    ADD CONSTRAINT producto_history_pk PRIMARY KEY (producto_history_id);
+
+
+--
+-- TOC entry 3148 (class 2606 OID 216963)
+-- Name: producto_ingrediente_pk; Type: CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.producto_material
+    ADD CONSTRAINT producto_ingrediente_pk PRIMARY KEY (producto_material_id);
+
+
+--
+-- TOC entry 3146 (class 2606 OID 216965)
+-- Name: producto_pk; Type: CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.producto
+    ADD CONSTRAINT producto_pk PRIMARY KEY (producto_id);
+
+
+--
+-- TOC entry 3150 (class 2606 OID 216969)
+-- Name: tipo_unidad_pk; Type: CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.tipo_unidad
+    ADD CONSTRAINT tipo_unidad_pk PRIMARY KEY (tipo_unidad_id);
+
+
+--
+-- TOC entry 3152 (class 2606 OID 216971)
+-- Name: tipo_usuario_pk; Type: CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.tipo_usuario
+    ADD CONSTRAINT tipo_usuario_pk PRIMARY KEY (tipo_usuario_id);
+
+
+--
+-- TOC entry 3154 (class 2606 OID 216973)
+-- Name: usuario_pk; Type: CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.usuario
+    ADD CONSTRAINT usuario_pk PRIMARY KEY (usuario_id);
+
+
+--
+-- TOC entry 3156 (class 2606 OID 216975)
+-- Name: usuario_un; Type: CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.usuario
+    ADD CONSTRAINT usuario_un UNIQUE (email);
+
+
+--
+-- TOC entry 3162 (class 2606 OID 216976)
+-- Name: material_empresa_fk; Type: FK CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.material
+    ADD CONSTRAINT material_empresa_fk FOREIGN KEY (empresa_id) REFERENCES gestion.empresa(empresa_id);
+
+
+--
+-- TOC entry 3161 (class 2606 OID 216986)
+-- Name: material_tipo_unidad_fk; Type: FK CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.material
+    ADD CONSTRAINT material_tipo_unidad_fk FOREIGN KEY (tipo_unidad_id) REFERENCES gestion.tipo_unidad(tipo_unidad_id);
+
+
+--
+-- TOC entry 3159 (class 2606 OID 471772)
+-- Name: material_usuario_actualizado_fk; Type: FK CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.material
+    ADD CONSTRAINT material_usuario_actualizado_fk FOREIGN KEY (actualizado_por) REFERENCES gestion.usuario(usuario_id);
+
+
+--
+-- TOC entry 3160 (class 2606 OID 471767)
+-- Name: material_usuario_creado_fk; Type: FK CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.material
+    ADD CONSTRAINT material_usuario_creado_fk FOREIGN KEY (creado_por) REFERENCES gestion.usuario(usuario_id);
+
+
+--
+-- TOC entry 3165 (class 2606 OID 216991)
+-- Name: producto_empresa_fk; Type: FK CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.producto
+    ADD CONSTRAINT producto_empresa_fk FOREIGN KEY (empresa_id) REFERENCES gestion.empresa(empresa_id);
+
+
+--
+-- TOC entry 3171 (class 2606 OID 422595)
+-- Name: producto_history_producto_fk; Type: FK CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.producto_history
+    ADD CONSTRAINT producto_history_producto_fk FOREIGN KEY (producto_id) REFERENCES gestion.producto(producto_id);
+
+
+--
+-- TOC entry 3168 (class 2606 OID 216996)
+-- Name: producto_material_material_fk; Type: FK CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.producto_material
+    ADD CONSTRAINT producto_material_material_fk FOREIGN KEY (material_id) REFERENCES gestion.material(material_id);
+
+
+--
+-- TOC entry 3167 (class 2606 OID 217001)
+-- Name: producto_material_producto_fk; Type: FK CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.producto_material
+    ADD CONSTRAINT producto_material_producto_fk FOREIGN KEY (producto_id) REFERENCES gestion.producto(producto_id);
+
+
+--
+-- TOC entry 3166 (class 2606 OID 217006)
+-- Name: producto_material_tipo_unidad_fk; Type: FK CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.producto_material
+    ADD CONSTRAINT producto_material_tipo_unidad_fk FOREIGN KEY (tipo_unidad_id) REFERENCES gestion.tipo_unidad(tipo_unidad_id);
+
+
+--
+-- TOC entry 3164 (class 2606 OID 471757)
+-- Name: producto_usuario_actualizado_fk; Type: FK CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.producto
+    ADD CONSTRAINT producto_usuario_actualizado_fk FOREIGN KEY (actualizado_por) REFERENCES gestion.usuario(usuario_id);
+
+
+--
+-- TOC entry 3163 (class 2606 OID 471762)
+-- Name: producto_usuario_creado_fk; Type: FK CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.producto
+    ADD CONSTRAINT producto_usuario_creado_fk FOREIGN KEY (creado_por) REFERENCES gestion.usuario(usuario_id);
+
+
+--
+-- TOC entry 3170 (class 2606 OID 217016)
+-- Name: usuario_empresa_fk; Type: FK CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.usuario
+    ADD CONSTRAINT usuario_empresa_fk FOREIGN KEY (empresa_id) REFERENCES gestion.empresa(empresa_id);
+
+
+--
+-- TOC entry 3169 (class 2606 OID 217021)
+-- Name: usuario_tipo_usuario_fk; Type: FK CONSTRAINT; Schema: gestion; Owner: -
+--
+
+ALTER TABLE ONLY gestion.usuario
+    ADD CONSTRAINT usuario_tipo_usuario_fk FOREIGN KEY (tipo_usuario_id) REFERENCES gestion.tipo_usuario(tipo_usuario_id);
+
+
+-- Completed on 2019-07-19 16:54:11 -04
+
+--
+-- PostgreSQL database dump complete
+--
+
