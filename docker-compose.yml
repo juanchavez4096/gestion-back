@@ -16,6 +16,10 @@ services:
     depends_on:
       - db # This service depends on postgres. Start that first.
     command: ["./wait-for-postgres.sh", "db", "python", "app.py"]
+    volumes:
+      - images-data:/var/lib/images/data
+    environment:
+      - file.upload-dir=/var/lib/images/data
     networks: # Networks to join (Services on the same network can communicate with each other using their name)
       - backend
 
@@ -33,6 +37,7 @@ services:
 # Volumes
 volumes:
   db-data:
+  images-data:
 
 # Networks to be created to facilitate communication between containers
 networks:
