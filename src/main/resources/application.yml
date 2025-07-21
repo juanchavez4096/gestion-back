@@ -50,7 +50,7 @@ logging:
     org.hibernate: off
 # Server configuration
 server:
-  port: 80
+  port: 8081
 
 jwt:
   secret: jqg)[i#|b"7j.$0kH;{UiQ$(@X<!r0dHgJ7GYT.jaF_#*9^E9^ynw!)sdq\|b|~
