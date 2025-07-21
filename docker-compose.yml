@@ -10,8 +10,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "8081:8081" # Forward the exposed port 8081 on the container to port 8081 on the host machine
     restart: always
     depends_on:
       - db # This service depends on postgres. Start that first.
@@ -21,13 +19,12 @@ services:
     environment:
       - file.upload-dir=/var/lib/images/data
     networks: # Networks to join (Services on the same network can communicate with each other using their name)
+      - proxy-network
       - backend
 
   # Database Service (Postgresql)
   db:
     image: postgres:9.5.19-alpine
-    ports:
-      - "5433:5432"
     restart: always
     volumes:
       - db-data:/var/lib/postgresql/data
