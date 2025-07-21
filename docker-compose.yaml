@@ -1,6 +1,6 @@
 services:
   # App backend service
-  app-server:
+  gestion-back:
     # Configuration for building the docker image for the backend service
     container_name: gestion-back
     build:
@@ -19,7 +19,7 @@ services:
       - backend
 
   # Database Service (Postgresql)
-  db:
+  gestion-back-db:
     container_name: gestion-back-db
     image: postgres:9.5.19-alpine
     restart: always
