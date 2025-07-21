@@ -2,6 +2,7 @@ services:
   # App backend service
   app-server:
     # Configuration for building the docker image for the backend service
+    container_name: gestion-back
     build:
       context: .
       dockerfile: Dockerfile
@@ -19,12 +20,14 @@ services:
 
   # Database Service (Postgresql)
   db:
+    container_name: gestion-back-db
     image: postgres:9.5.19-alpine
     restart: always
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
       - backend
+      - proxy-network
 
 # Volumes
 volumes:
