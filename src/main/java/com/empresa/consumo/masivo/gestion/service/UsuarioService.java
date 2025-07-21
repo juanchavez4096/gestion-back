@@ -52,6 +52,7 @@ public class UsuarioService {
 
 			user = userObj.get();
 			String password = randomString();
+			log.info(password);
 			encodedPassword = passwordEncoder.encode(password);
 			user.setCodigoRecuperacion(encodedPassword);
 			usuarioRepository.save(user);
