@@ -14,6 +14,7 @@ services:
       - images-data:/var/lib/images/data
     environment:
       - file.upload-dir=/var/lib/images/data
+      - PORT=8081
     networks: # Networks to join (Services on the same network can communicate with each other using their name)
       - backend
 
