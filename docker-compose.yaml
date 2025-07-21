@@ -23,11 +23,13 @@ services:
     container_name: gestion-back-db
     image: postgres:9.5.19-alpine
     restart: always
+    ports:
+      - 5433:5432
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
       - backend
-      - proxy-network
+    
 
 # Volumes
 volumes:
