@@ -8,8 +8,8 @@ services:
       dockerfile: Dockerfile
     restart: always
     depends_on:
-      - db # This service depends on postgres. Start that first.
-    command: ["./wait-for-postgres.sh", "db", "python", "app.py"]
+      - gestion-back-db # This service depends on postgres. Start that first.
+    command: ["./wait-for-postgres.sh", "gestion-back-db", "python", "app.py"]
     volumes:
       - images-data:/var/lib/images/data
     environment:
