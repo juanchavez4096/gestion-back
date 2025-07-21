@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DolarTodayDTO  {
-    @JsonAlias({ "USD"})
+    @JsonAlias({"USD"})
     private USD usd;
 }
 

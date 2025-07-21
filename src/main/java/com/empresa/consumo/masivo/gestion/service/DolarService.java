@@ -26,7 +26,7 @@ public class DolarService {
     @Autowired
     private EmpresaRepository empresaRepository;
 
-    @Scheduled(fixedRate = 1000000)
+    //@Scheduled(fixedRate = 1000000)
     public void getDollar() throws BusinessServiceException {
 
         String dolarTodayDTOString = dolarFacade.getDolar();
