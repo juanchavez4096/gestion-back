@@ -297,8 +297,8 @@ public class ProductoController {
 				}
 
 			}
-			productoDTO.setPrecioVenta(df.format(total));
-			productoDTO.setGanancia(df.format(ganancia));
+			productoDTO.setPrecioVenta(df.format(Math.ceil(total)));
+			productoDTO.setGanancia(df.format(Math.ceil(ganancia)));
 			productoDTO.setPrecioVentaDolares(df.format(precioDolares));
 
 		}
